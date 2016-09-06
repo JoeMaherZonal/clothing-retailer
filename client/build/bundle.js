@@ -48,9 +48,11 @@
 	
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(158);
+	var Product = __webpack_require__(159);
 	
 	window.onload = function () {
 	  console.log("app started");
+	
 	  ReactDOM.render(React.createElement(
 	    'h4',
 	    null,
@@ -19751,6 +19753,20 @@
 	
 	module.exports = __webpack_require__(3);
 
+
+/***/ },
+/* 159 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	var Product = function Product(params) {
+	  this.name = params.name, this.category = params.category, this.colour = params.colour, this.price = params.price;
+	};
+	
+	Product.prototype = {};
+	
+	module.exports = Product;
 
 /***/ }
 /******/ ]);
