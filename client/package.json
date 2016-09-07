@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha ./src/specs",
     "start": "webpack -w"
   },
   "keywords": [],
@@ -18,9 +18,10 @@
     "webpack": "^1.12.12"
   },
   "dependencies": {
+    "bootstrap": "^3.3.7",
+    "lodash": "^4.14.1",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "lodash": "^4.14.1",
     "webpack": "^1.13.2"
   },
   "description": ""

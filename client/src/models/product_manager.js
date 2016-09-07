@@ -20,6 +20,13 @@ ProductManager.prototype = {
     this.products.splice(index, 1)
   },
 
+  productsOfCat: function(category){
+    var filteredProducts = this.products.filter(function(p){
+      return p.isOfCategory(category)
+    })
+    return filteredProducts
+  },
+
   productByName: function(name){
     if(this.products.length === 0){return}
     for(product of this.products){
