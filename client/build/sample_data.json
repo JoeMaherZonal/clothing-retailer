@@ -1,0 +1,92 @@
+[
+  {
+    "Name" : "Almond Toe Court Shoes",
+    "colour" : "Black", 
+    "category" : "Women’s Footwear", 
+    "price" : 99.00,
+    "quantity" : 5
+  },
+  {
+    "Name" : "Suede Shoes",
+    "colour" : "Blue", 
+    "category" : "Women’s Footwear",
+    "price" : 42.00,
+    "quantity" : 4
+  },
+  {
+    "Name" : "Leather Driver Saddle Loafers",
+    "colour" : "Tan",
+    "category" : "Men’s Footwear",
+    "price" : 42.00,
+    "quantity" : 4
+  },
+  {
+    "Name" : "Flip Flops",
+    "colour" : "Red",
+    "category" : "Men’s Footwear",
+    "price" : 19.00,
+    "quantity" : 6
+  },
+  {
+    "Name" : "Flip Flops",
+    "colour" : "Blue",
+    "category" : "Men’s Footwear",
+    "price" : 19.00,
+    "quantity" : 0
+  },
+  {
+    "Name" : "Gold Button Cardigan",
+    "colour" : "Black", "Category" :
+    "comen’s Casualwear",
+    "price" : 167.00,
+    "quantity" : 6
+  },
+  {
+    "Name" : "Cotton Shorts",
+    "colour" : "Medium Red", "Category" :
+    "comen’s Casualwear",
+    "price" : 30.00,
+    "quantity" : 5
+  },
+  {
+    "Name" : "Fine Stripe Short Sleeve Shirt",
+    "colour" : "Grey",
+    "category" : "Men’s Casualwear",
+    "price" : 49.99,
+    "quantity" : 9
+  },
+  {
+    "Name" : "Fine Stripe Short Sleeve Shirt",
+    "colour" : "Green",
+    "category" : "Men’s Casualwear",
+    "price" : 39.99,
+    "quantity" : 3
+  },
+  {
+    "Name" : "Sharkskin Waistcoat",
+    "colour" : "Charcoal", "Category" : "Men’s Formalwear",
+    "crice" : 42.00,
+    "puantity" : 4
+  },
+  {
+    "Name" : "Patch Pocket Blazer",
+    "colour" : "Deer",
+    "category" : "Men’s Formalwear",
+    "price" : 175.50,
+    "quantity" : 1
+  },
+  {
+    "Name" : "Bird Print Dress",
+    "colour" : "Black",
+    "category" : "Women’s Formalwear",
+    "price" : 270.00,
+    "quantity" : 10
+  },
+  {
+    "Name" : "Mid Twist Cut-Out Dress",
+    "colour" : "Pink",
+    "category" : "Women’s Formalwear",
+    "price" : 540.00,
+    "quantity" : 5
+  }
+]

@@ -6,6 +6,10 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname + '/client/build/index.html'));
 });
 
+app.get('/data', function (req, res) {
+  res.sendFile(path.join(__dirname + '/client/build/sample_data.json'));
+});
+
 app.use(express.static('client/build'));
 
 

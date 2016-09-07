@@ -24,5 +24,4 @@ describe("Product Tests", function(){
     assert.equal(20, product1.price)
   })
 
-
 })
