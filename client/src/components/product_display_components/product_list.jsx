@@ -9,8 +9,8 @@ var ProductList = React.createClass({
         )
     })
     return(
-      <div className="row" id='product-box'>
-        <div className="col-12">
+      <div className="row">
+        <div className="col-12" id='product-list'>
           {productNodes}
         </div>
       </div>

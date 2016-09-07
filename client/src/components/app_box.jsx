@@ -3,6 +3,7 @@ var TitleBox = require('./title_box')
 var OptionsBox = require('./option_components/options_box')
 var ProductList = require('./product_display_components/product_list')
 var ProductManager = require('../models/product_manager')
+var _ = require('lodash')
 
 var AppBox = React.createClass({
 
@@ -13,7 +14,7 @@ var AppBox = React.createClass({
       {id: "women", selected: false},
       {id: "casual", selected: false},
       {id: "formal", selected: false},
-      {id: "shoes", selected: false}
+      {id: "footwear", selected: false}
       ],
       productManager: null
     }
@@ -69,7 +70,9 @@ var AppBox = React.createClass({
          filteredProducts = filteredProducts.concat(productManager.productsOfCat(filter.id))
       }
     }
-    return filteredProducts
+    return _.uniqBy(filteredProducts, function(element){
+      return element.name
+    })
   },
 
   checkForNoFilteres: function(){

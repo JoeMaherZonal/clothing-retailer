@@ -19761,6 +19761,7 @@
 	var OptionsBox = __webpack_require__(161);
 	var ProductList = __webpack_require__(164);
 	var ProductManager = __webpack_require__(166);
+	var _ = __webpack_require__(168);
 	
 	var AppBox = React.createClass({
 	  displayName: 'AppBox',
@@ -19768,7 +19769,7 @@
 	
 	  getInitialState: function getInitialState() {
 	    return {
-	      selectedFilters: [{ id: "men", selected: false }, { id: "women", selected: false }, { id: "casual", selected: false }, { id: "formal", selected: false }, { id: "shoes", selected: false }],
+	      selectedFilters: [{ id: "men", selected: false }, { id: "women", selected: false }, { id: "casual", selected: false }, { id: "formal", selected: false }, { id: "footwear", selected: false }],
 	      productManager: null
 	    };
 	  },
@@ -19868,7 +19869,9 @@
 	      }
 	    }
 	
-	    return filteredProducts;
+	    return _.uniqBy(filteredProducts, function (element) {
+	      return element.name;
+	    });
 	  },
 	
 	  checkForNoFilteres: function checkForNoFilteres() {
@@ -20133,10 +20136,10 @@
 	    });
 	    return React.createElement(
 	      'div',
-	      { className: 'row', id: 'product-box' },
+	      { className: 'row' },
 	      React.createElement(
 	        'div',
-	        { className: 'col-12' },
+	        { className: 'col-12', id: 'product-list' },
 	        productNodes
 	      )
 	    );
@@ -20159,15 +20162,27 @@
 	  displayName: 'ProductBox',
 	
 	
+	  handleClick: function handleClick() {},
+	
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      { className: 'row', id: 'product-box' },
 	      React.createElement(
 	        'div',
-	        { className: 'col-12' },
-	        this.props.product.name
-	      )
+	        { className: 'row' },
+	        React.createElement('img', { id: 'product-image', src: 'images/shirticon.png' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'row' },
+	        React.createElement(
+	          'button',
+	          { onClick: this.handleClick, id: 'product-button' },
+	          'Add'
+	        )
+	      ),
+	      this.props.product.name
 	    );
 	  }
 	
