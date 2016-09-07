@@ -1,12 +1,12 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
-var Product = require('./models/product.js')
+var AppBox = require('./components/app_box')
 
 window.onload = function(){
   console.log("app started")
   
   ReactDOM.render(
-    <h4>App started</h4>,
+    <AppBox />,
     document.getElementById('main-div')
   );
 }

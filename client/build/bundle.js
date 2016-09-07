@@ -48,16 +48,12 @@
 	
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(158);
-	var Product = __webpack_require__(159);
+	var AppBox = __webpack_require__(160);
 	
 	window.onload = function () {
 	  console.log("app started");
 	
-	  ReactDOM.render(React.createElement(
-	    'h4',
-	    null,
-	    'App started'
-	  ), document.getElementById('main-div'));
+	  ReactDOM.render(React.createElement(AppBox, null), document.getElementById('main-div'));
 	};
 
 /***/ },
@@ -19755,18 +19751,29 @@
 
 
 /***/ },
-/* 159 */
-/***/ function(module, exports) {
+/* 159 */,
+/* 160 */
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
-	var Product = function Product(params) {
-	  this.name = params.name, this.category = params.category, this.colour = params.colour, this.price = parseInt(params.price);
-	};
+	var React = __webpack_require__(1);
 	
-	Product.prototype = {};
+	var AppBox = React.createClass({
+	  displayName: 'AppBox',
 	
-	module.exports = Product;
+	
+	  render: function render() {
+	    return React.createElement(
+	      'h4',
+	      null,
+	      'App Started'
+	    );
+	  }
+	
+	});
+	
+	module.exports = AppBox;
 
 /***/ }
 /******/ ]);
