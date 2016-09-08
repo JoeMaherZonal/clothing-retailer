@@ -4,6 +4,7 @@ var OptionsBox = require('./option_components/options_box')
 var ProductList = require('./product_display_components/product_list')
 var ProductManager = require('../models/product_manager')
 var _ = require('lodash')
+var ShoppingBasket = require('../models/shopping_basket')
 
 var AppBox = React.createClass({
 
@@ -16,11 +17,12 @@ var AppBox = React.createClass({
       {id: "formal", selected: false},
       {id: "footwear", selected: false}
       ],
-      productManager: null
+      productManager: null,
+      shoppingBasket: new ShoppingBasket()
     }
   },
 
-  componentWillMount(){
+  loadDataFromAPI: function(){
     var url = "http://localhost:5000/data"
     var request = new XMLHttpRequest()
     request.open("GET", url)
@@ -31,6 +33,53 @@ var AppBox = React.createClass({
       }
     }.bind(this)
     request.send(null)
+  },
+
+  addItemToBasket: function(product) {
+    this.state.shoppingBasket.addItem(product)
+    var array = ["one", "two", "three"];
+  },
+
+  loadPreviousShoppingData: function(){
+    var previousShopping = JSON.parse(localStorage.getItem('shoppingBasket')) || []
+    var previousVoucher = JSON.parse(localStorage.getItem('voucher')) || null
+    var currentShoppingBasket = this.state.shoppingBasket
+    currentShoppingBasket.items = previousShopping
+    currentShoppingBasket.voucher = previousVoucher
+    this.setState({shoppingBasket: currentShoppingBasket })
+  },
+
+  saveCurrentShopping: function(){
+    var currentShopping = this.state.shoppingBasket.items
+    var currentVoucher = this.state.shoppingBasket.voucher
+    localStorage.setItem('shoppingBasket', JSON.stringify(allResults));
+  },
+
+  removeItemFromBasket: function(product){
+    var shoppingBasket = this.state.shoppingBasket
+    shoppingBasket.removeItem(product)
+    this.setState({shoppingBasket: shoppingBasket})
+  },
+
+  createShoppingBasket: function(){
+    var shoppingBasket = new ShoppingBasket()
+    this.setState({shoppingBasket: shoppingBasket})
+  },
+
+  readyState: function() {
+    this.createShoppingBasket()
+    this.loadPreviousShoppingData()
+  },
+
+  componentDidMount(){
+    this.readyState()
+    this.loadDataFromAPI()
+    setInterval(this.loadDataFromAPI, 500)
+  },
+
+  addVoucher: function(code){
+    var shoppingBasket = this.state.shoppingBasket
+    shoppingBasket.addVoucher()
   },
 
   createProductManager: function(data){
@@ -85,6 +134,7 @@ var AppBox = React.createClass({
   render: function(){
     return(
       <div className="row" id='app-container'>
+      <div className="col-12">
 
         <div className="row">
           <div className="col-12">
@@ -94,16 +144,17 @@ var AppBox = React.createClass({
 
         <div className="row">
           <div className="col-12">
-            <OptionsBox updateFilter={this.updateFilter}/>
+            <OptionsBox updateFilter={this.updateFilter} shoppingBasket = {this.state.shoppingBasket} removeItemFromBasket={this.removeItemFromBasket} applyVoucher={this.applyVoucher}/>
           </div>
         </div>
 
         <div className="row">
           <div className="col-12">
-            <ProductList products = {this.productsToDisplay} />
+            <ProductList products = {this.productsToDisplay} addItemToBasket={this.addItemToBasket} />
           </div>
         </div>
 
+      </div>
       </div>
       )}
 

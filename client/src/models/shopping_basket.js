@@ -23,7 +23,7 @@ ShoppingBasket.prototype = {
 
   totalPrice: function(){
     var total = 0;
-    for(item of this.items){
+    for(var item of this.items){
       total += item.price
     }
     return total
@@ -49,6 +49,18 @@ ShoppingBasket.prototype = {
   getVoucherDiscount: function(shoppingBasket){
     if(this.voucher === null || this.items.length === 0){return 0}
     return this.voucher.calculateDiscount(shoppingBasket)
+  },
+
+  isVoucherValid: function(){
+    return getVoucherDiscount() != 0
+  },
+
+  createFilters: function(){
+    var filters = []
+    for(item of this.items){
+      filters.push({id: item, selected: false})
+    }
+    return filters
   }
 }
 

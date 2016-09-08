@@ -4,7 +4,7 @@ var ProductList = require('./product_list')
 var ProductBox = React.createClass({
 
   handleClick: function(){
-
+    this.props.addItemToBasket(this.props.product)
   },
 
   render: function(){

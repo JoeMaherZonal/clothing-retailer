@@ -31,7 +31,7 @@ var OptionsBox = React.createClass({
 
   render: function(){
     return(
-      <div className="row" id="options-box">
+      <div className="col-12" id="options-box">
 
         <div className="row">
           <div className="col-6" id="filter-button-container">
@@ -46,7 +46,7 @@ var OptionsBox = React.createClass({
           </div>
 
           <div className={this.basketContainerClassName} id="basket-container">
-            <BasketBox />
+            <BasketBox removeItemFromBasket={this.props.removeItemFromBasket} shoppingBasket = {this.props.shoppingBasket} applyVoucher={this.props.applyVoucher} />
           </div>
         </div>
 
