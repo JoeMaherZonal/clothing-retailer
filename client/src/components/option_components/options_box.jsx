@@ -46,7 +46,7 @@ var OptionsBox = React.createClass({
           </div>
 
           <div className={this.basketContainerClassName} id="basket-container">
-            <BasketBox removeItemFromBasket={this.props.removeItemFromBasket} shoppingBasket = {this.props.shoppingBasket} applyVoucher={this.props.applyVoucher} />
+            <BasketBox removeItemFromBasket={this.props.removeItemFromBasket} shoppingBasket = {this.props.shoppingBasket} addVoucher={this.props.addVoucher} updateShoppingBasket={this.props.updateShoppingBasket} />
           </div>
         </div>
 

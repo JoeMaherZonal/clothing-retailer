@@ -5,6 +5,7 @@ var ProductList = require('./product_display_components/product_list')
 var ProductManager = require('../models/product_manager')
 var _ = require('lodash')
 var ShoppingBasket = require('../models/shopping_basket')
+var DiscountVoucher = require('../models/discount_voucher')
 
 var AppBox = React.createClass({
 
@@ -18,7 +19,8 @@ var AppBox = React.createClass({
       {id: "footwear", selected: false}
       ],
       productManager: null,
-      shoppingBasket: new ShoppingBasket()
+      shoppingBasket: new ShoppingBasket(),
+      validVouchers: null
     }
   },
 
@@ -36,8 +38,9 @@ var AppBox = React.createClass({
   },
 
   addItemToBasket: function(product) {
-    this.state.shoppingBasket.addItem(product)
-    var array = ["one", "two", "three"];
+    var shoppingBasket = this.state.shoppingBasket
+    shoppingBasket.addItem(product)
+    this.setState({shoppingBasket: shoppingBasket})
   },
 
   loadPreviousShoppingData: function(){
@@ -69,17 +72,29 @@ var AppBox = React.createClass({
   readyState: function() {
     this.createShoppingBasket()
     this.loadPreviousShoppingData()
+    this.createValidVouchers()
   },
 
   componentDidMount(){
     this.readyState()
     this.loadDataFromAPI()
-    setInterval(this.loadDataFromAPI, 500)
+    // setInterval(this.loadDataFromAPI, 500)
+  },
+
+  findVoucher: function(code){
+    for(var voucher of this.state.validVouchers){
+      if(voucher.code === code){
+        return voucher
+      }
+    }
   },
 
   addVoucher: function(code){
     var shoppingBasket = this.state.shoppingBasket
-    shoppingBasket.addVoucher()
+    if(this.findVoucher(code)){
+      shoppingBasket.addDiscountVoucher(this.findVoucher(code))
+    }
+    this.setState({shoppingBasket: shoppingBasket})
   },
 
   createProductManager: function(data){
@@ -131,6 +146,44 @@ var AppBox = React.createClass({
     return false
   },
 
+  updateShoppingBasket: function(shoppingBasket){
+    this.setState({shoppingBasket: shoppingBasket})
+  },
+
+  createValidVouchers: function(){
+    var discountVoucher1 = new DiscountVoucher("5OFF", function(){
+      return 5
+    })
+    var discountVoucher2 = new DiscountVoucher("10OFF", function(items){
+      var totalSpend = _.sumBy(items, function(o) { return o.price; })
+      if(totalSpend > 50){
+        return 10;
+      }else{
+        return 0;
+      }
+    })
+    var discountVoucher3 = new DiscountVoucher("15OFF", function(items){
+      var totalSpend = _.sumBy(items, function(product) { return product.price; })
+      var hasItemWithCategory = false
+      console.log("item",items)
+      for(var item of items){
+        for(var cat of item.categorys){
+          if(cat === "footwear"){
+            hasItemWithCategory = true
+          }
+        }
+      }
+      console.log("HAS:",hasItemWithCategory)
+      if(totalSpend > 75 && hasItemWithCategory){
+        return 15;
+      }else{
+        //invalid
+        return 0;
+      }
+    })
+    this.setState({validVouchers: [discountVoucher1, discountVoucher2, discountVoucher3]})
+  },
+
   render: function(){
     return(
       <div className="row" id='app-container'>
@@ -144,7 +197,7 @@ var AppBox = React.createClass({
 
         <div className="row">
           <div className="col-12">
-            <OptionsBox updateFilter={this.updateFilter} shoppingBasket = {this.state.shoppingBasket} removeItemFromBasket={this.removeItemFromBasket} applyVoucher={this.applyVoucher}/>
+            <OptionsBox updateFilter={this.updateFilter} shoppingBasket = {this.state.shoppingBasket} removeItemFromBasket={this.removeItemFromBasket} addVoucher={this.addVoucher} updateShoppingBasket={this.updateShoppingBasket}/>
           </div>
         </div>
 

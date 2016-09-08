@@ -24,7 +24,7 @@ var BasketBox = React.createClass({
 
         <div className="row">
           <div className="col-12">
-          <VoucherBox applyVoucher={this.props.applyVoucher} />
+          <VoucherBox shoppingBasket={this.props.shoppingBasket} addVoucher={this.props.addVoucher} updateShoppingBasket={this.props.updateShoppingBasket} />
           </div>
         </div>
 

@@ -22,6 +22,13 @@ ShoppingBasket.prototype = {
   },
 
   totalPrice: function(){
+    if(this.isVoucherValid()){
+      return this.totalOfItems() - this.getVoucherDiscount()
+    }
+    return this.totalOfItems()
+  },
+
+  totalOfItems: function(){
     var total = 0;
     for(var item of this.items){
       total += item.price
@@ -41,18 +48,22 @@ ShoppingBasket.prototype = {
       this.voucher = voucher
       return
     }
-    if(voucher.calculateDiscount(this) > this.voucher.calculateDiscount(this)){
+    if(voucher.calculateDiscount(this.items) > this.voucher.calculateDiscount(this.items)){
       this.voucher = voucher
     }
   },
 
-  getVoucherDiscount: function(shoppingBasket){
+  clearVoucher: function(){
+    this.voucher = null;
+  },
+
+  getVoucherDiscount: function(){
     if(this.voucher === null || this.items.length === 0){return 0}
-    return this.voucher.calculateDiscount(shoppingBasket)
+    return this.voucher.calculateDiscount(this.items)
   },
 
   isVoucherValid: function(){
-    return getVoucherDiscount() != 0
+    return this.getVoucherDiscount() != 0
   },
 
   createFilters: function(){

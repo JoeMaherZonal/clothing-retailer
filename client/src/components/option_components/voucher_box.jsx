@@ -11,8 +11,21 @@ var VoucherBox = React.createClass({
     this.setState({voucherCode: newCode})
   },
 
-  handleCLick: function(){
-    this.props.applyVoucher(this.state.voucherCode)
+  handleClick: function(){
+    console.log("button clicked")
+    this.props.addVoucher(this.state.voucherCode)
+    this.chechIfVoucherIsValid()
+  },
+
+  chechIfVoucherIsValid: function(){
+    var shoppingBasket = this.props.shoppingBasket
+    if(shoppingBasket.voucher && shoppingBasket.isVoucherValid()){
+      console.log("valid voucher")
+    }else{
+      shoppingBasket.clearVoucher()
+      this.props.updateShoppingBasket(shoppingBasket)
+      console.log("invalid voucher removing")
+    }
   },
 
   render: function(){

@@ -52,7 +52,6 @@
 	
 	window.onload = function () {
 	  console.log("app started");
-	
 	  ReactDOM.render(React.createElement(AppBox, null), document.getElementById('main-div'));
 	};
 
@@ -19763,6 +19762,7 @@
 	var ProductManager = __webpack_require__(170);
 	var _ = __webpack_require__(172);
 	var ShoppingBasket = __webpack_require__(174);
+	var DiscountVoucher = __webpack_require__(176);
 	
 	var AppBox = React.createClass({
 	  displayName: 'AppBox',
@@ -19772,7 +19772,8 @@
 	    return {
 	      selectedFilters: [{ id: "men", selected: false }, { id: "women", selected: false }, { id: "casual", selected: false }, { id: "formal", selected: false }, { id: "footwear", selected: false }],
 	      productManager: null,
-	      shoppingBasket: new ShoppingBasket()
+	      shoppingBasket: new ShoppingBasket(),
+	      validVouchers: null
 	    };
 	  },
 	
@@ -19790,8 +19791,9 @@
 	  },
 	
 	  addItemToBasket: function addItemToBasket(product) {
-	    this.state.shoppingBasket.addItem(product);
-	    var array = ["one", "two", "three"];
+	    var shoppingBasket = this.state.shoppingBasket;
+	    shoppingBasket.addItem(product);
+	    this.setState({ shoppingBasket: shoppingBasket });
 	  },
 	
 	  loadPreviousShoppingData: function loadPreviousShoppingData() {
@@ -19823,31 +19825,28 @@
 	  readyState: function readyState() {
 	    this.createShoppingBasket();
 	    this.loadPreviousShoppingData();
+	    this.createValidVouchers();
 	  },
 	
 	  componentDidMount: function componentDidMount() {
 	    this.readyState();
 	    this.loadDataFromAPI();
-	    setInterval(this.loadDataFromAPI, 500);
+	    // setInterval(this.loadDataFromAPI, 500)
 	  },
 	
 	
-	  addVoucher: function addVoucher(code) {
-	    var shoppingBasket = this.state.shoppingBasket;
-	    shoppingBasket.addVoucher();
-	  },
-	
-	  createProductManager: function createProductManager(data) {
-	    var productManager = new ProductManager();
+	  findVoucher: function findVoucher(code) {
 	    var _iteratorNormalCompletion = true;
 	    var _didIteratorError = false;
 	    var _iteratorError = undefined;
 	
 	    try {
-	      for (var _iterator = data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	        var product = _step.value;
+	      for (var _iterator = this.state.validVouchers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	        var voucher = _step.value;
 	
-	        productManager.addProduct({ name: product.name, price: product.price, category: product.category, colour: product.colour });
+	        if (voucher.code === code) {
+	          return voucher;
+	        }
 	      }
 	    } catch (err) {
 	      _didIteratorError = true;
@@ -19860,6 +19859,42 @@
 	      } finally {
 	        if (_didIteratorError) {
 	          throw _iteratorError;
+	        }
+	      }
+	    }
+	  },
+	
+	  addVoucher: function addVoucher(code) {
+	    var shoppingBasket = this.state.shoppingBasket;
+	    if (this.findVoucher(code)) {
+	      shoppingBasket.addDiscountVoucher(this.findVoucher(code));
+	    }
+	    this.setState({ shoppingBasket: shoppingBasket });
+	  },
+	
+	  createProductManager: function createProductManager(data) {
+	    var productManager = new ProductManager();
+	    var _iteratorNormalCompletion2 = true;
+	    var _didIteratorError2 = false;
+	    var _iteratorError2 = undefined;
+	
+	    try {
+	      for (var _iterator2 = data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	        var product = _step2.value;
+	
+	        productManager.addProduct({ name: product.name, price: product.price, category: product.category, colour: product.colour });
+	      }
+	    } catch (err) {
+	      _didIteratorError2 = true;
+	      _iteratorError2 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	          _iterator2.return();
+	        }
+	      } finally {
+	        if (_didIteratorError2) {
+	          throw _iteratorError2;
 	        }
 	      }
 	    }
@@ -19891,39 +19926,6 @@
 	      return productManager.products;
 	    }
 	    var filteredProducts = [];
-	    var _iteratorNormalCompletion2 = true;
-	    var _didIteratorError2 = false;
-	    var _iteratorError2 = undefined;
-	
-	    try {
-	      for (var _iterator2 = this.state.selectedFilters[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	        var filter = _step2.value;
-	
-	        if (filter.selected) {
-	          filteredProducts = filteredProducts.concat(productManager.productsOfCat(filter.id));
-	        }
-	      }
-	    } catch (err) {
-	      _didIteratorError2 = true;
-	      _iteratorError2 = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	          _iterator2.return();
-	        }
-	      } finally {
-	        if (_didIteratorError2) {
-	          throw _iteratorError2;
-	        }
-	      }
-	    }
-	
-	    return _.uniqBy(filteredProducts, function (element) {
-	      return element.name;
-	    });
-	  },
-	
-	  checkForNoFilteres: function checkForNoFilteres() {
 	    var _iteratorNormalCompletion3 = true;
 	    var _didIteratorError3 = false;
 	    var _iteratorError3 = undefined;
@@ -19933,7 +19935,7 @@
 	        var filter = _step3.value;
 	
 	        if (filter.selected) {
-	          return true;
+	          filteredProducts = filteredProducts.concat(productManager.productsOfCat(filter.id));
 	        }
 	      }
 	    } catch (err) {
@@ -19951,7 +19953,124 @@
 	      }
 	    }
 	
+	    return _.uniqBy(filteredProducts, function (element) {
+	      return element.name;
+	    });
+	  },
+	
+	  checkForNoFilteres: function checkForNoFilteres() {
+	    var _iteratorNormalCompletion4 = true;
+	    var _didIteratorError4 = false;
+	    var _iteratorError4 = undefined;
+	
+	    try {
+	      for (var _iterator4 = this.state.selectedFilters[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	        var filter = _step4.value;
+	
+	        if (filter.selected) {
+	          return true;
+	        }
+	      }
+	    } catch (err) {
+	      _didIteratorError4 = true;
+	      _iteratorError4 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	          _iterator4.return();
+	        }
+	      } finally {
+	        if (_didIteratorError4) {
+	          throw _iteratorError4;
+	        }
+	      }
+	    }
+	
 	    return false;
+	  },
+	
+	  updateShoppingBasket: function updateShoppingBasket(shoppingBasket) {
+	    this.setState({ shoppingBasket: shoppingBasket });
+	  },
+	
+	  createValidVouchers: function createValidVouchers() {
+	    var discountVoucher1 = new DiscountVoucher("5OFF", function () {
+	      return 5;
+	    });
+	    var discountVoucher2 = new DiscountVoucher("10OFF", function (items) {
+	      var totalSpend = _.sumBy(items, function (o) {
+	        return o.price;
+	      });
+	      if (totalSpend > 50) {
+	        return 10;
+	      } else {
+	        return 0;
+	      }
+	    });
+	    var discountVoucher3 = new DiscountVoucher("15OFF", function (items) {
+	      var totalSpend = _.sumBy(items, function (product) {
+	        return product.price;
+	      });
+	      var hasItemWithCategory = false;
+	      console.log("item", items);
+	      var _iteratorNormalCompletion5 = true;
+	      var _didIteratorError5 = false;
+	      var _iteratorError5 = undefined;
+	
+	      try {
+	        for (var _iterator5 = items[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	          var item = _step5.value;
+	          var _iteratorNormalCompletion6 = true;
+	          var _didIteratorError6 = false;
+	          var _iteratorError6 = undefined;
+	
+	          try {
+	            for (var _iterator6 = item.categorys[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	              var cat = _step6.value;
+	
+	              if (cat === "footwear") {
+	                hasItemWithCategory = true;
+	              }
+	            }
+	          } catch (err) {
+	            _didIteratorError6 = true;
+	            _iteratorError6 = err;
+	          } finally {
+	            try {
+	              if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                _iterator6.return();
+	              }
+	            } finally {
+	              if (_didIteratorError6) {
+	                throw _iteratorError6;
+	              }
+	            }
+	          }
+	        }
+	      } catch (err) {
+	        _didIteratorError5 = true;
+	        _iteratorError5 = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	            _iterator5.return();
+	          }
+	        } finally {
+	          if (_didIteratorError5) {
+	            throw _iteratorError5;
+	          }
+	        }
+	      }
+	
+	      console.log("HAS:", hasItemWithCategory);
+	      if (totalSpend > 75 && hasItemWithCategory) {
+	        return 15;
+	      } else {
+	        //invalid
+	        return 0;
+	      }
+	    });
+	    this.setState({ validVouchers: [discountVoucher1, discountVoucher2, discountVoucher3] });
 	  },
 	
 	  render: function render() {
@@ -19976,7 +20095,7 @@
 	          React.createElement(
 	            'div',
 	            { className: 'col-12' },
-	            React.createElement(OptionsBox, { updateFilter: this.updateFilter, shoppingBasket: this.state.shoppingBasket, removeItemFromBasket: this.removeItemFromBasket, applyVoucher: this.applyVoucher })
+	            React.createElement(OptionsBox, { updateFilter: this.updateFilter, shoppingBasket: this.state.shoppingBasket, removeItemFromBasket: this.removeItemFromBasket, addVoucher: this.addVoucher, updateShoppingBasket: this.updateShoppingBasket })
 	          )
 	        ),
 	        React.createElement(
@@ -20092,7 +20211,7 @@
 	        React.createElement(
 	          'div',
 	          { className: this.basketContainerClassName, id: 'basket-container' },
-	          React.createElement(BasketBox, { removeItemFromBasket: this.props.removeItemFromBasket, shoppingBasket: this.props.shoppingBasket, applyVoucher: this.props.applyVoucher })
+	          React.createElement(BasketBox, { removeItemFromBasket: this.props.removeItemFromBasket, shoppingBasket: this.props.shoppingBasket, addVoucher: this.props.addVoucher, updateShoppingBasket: this.props.updateShoppingBasket })
 	        )
 	      )
 	    );
@@ -20193,7 +20312,7 @@
 	          React.createElement(
 	            'div',
 	            { className: 'col-12' },
-	            React.createElement(VoucherBox, { applyVoucher: this.props.applyVoucher })
+	            React.createElement(VoucherBox, { shoppingBasket: this.props.shoppingBasket, addVoucher: this.props.addVoucher, updateShoppingBasket: this.props.updateShoppingBasket })
 	          )
 	        )
 	      )
@@ -20303,12 +20422,12 @@
 /* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	var React = __webpack_require__(1);
 	
 	var VoucherBox = React.createClass({
-	  displayName: 'VoucherBox',
+	  displayName: "VoucherBox",
 	
 	
 	  getInitialState: function getInitialState() {
@@ -20320,26 +20439,39 @@
 	    this.setState({ voucherCode: newCode });
 	  },
 	
-	  handleCLick: function handleCLick() {
-	    this.props.applyVoucher(this.state.voucherCode);
+	  handleClick: function handleClick() {
+	    console.log("button clicked");
+	    this.props.addVoucher(this.state.voucherCode);
+	    this.chechIfVoucherIsValid();
+	  },
+	
+	  chechIfVoucherIsValid: function chechIfVoucherIsValid() {
+	    var shoppingBasket = this.props.shoppingBasket;
+	    if (shoppingBasket.voucher && shoppingBasket.isVoucherValid()) {
+	      console.log("valid voucher");
+	    } else {
+	      shoppingBasket.clearVoucher();
+	      this.props.updateShoppingBasket(shoppingBasket);
+	      console.log("invalid voucher removing");
+	    }
 	  },
 	
 	  render: function render() {
 	    return React.createElement(
-	      'div',
-	      { className: 'row', id: 'voucher-box' },
+	      "div",
+	      { className: "row", id: "voucher-box" },
 	      React.createElement(
-	        'div',
-	        { className: 'col-6' },
-	        React.createElement('input', { type: 'text', placeholder: 'voucher code', onChange: this.handleChange })
+	        "div",
+	        { className: "col-6" },
+	        React.createElement("input", { type: "text", placeholder: "voucher code", onChange: this.handleChange })
 	      ),
 	      React.createElement(
-	        'div',
-	        { className: 'col-6' },
+	        "div",
+	        { className: "col-6" },
 	        React.createElement(
-	          'button',
+	          "button",
 	          { onClick: this.handleClick },
-	          'Apply'
+	          "Apply"
 	        )
 	      )
 	    );
@@ -37328,6 +37460,13 @@
 	  },
 	
 	  totalPrice: function totalPrice() {
+	    if (this.isVoucherValid()) {
+	      return this.totalOfItems() - this.getVoucherDiscount();
+	    }
+	    return this.totalOfItems();
+	  },
+	
+	  totalOfItems: function totalOfItems() {
 	    var total = 0;
 	    var _iteratorNormalCompletion = true;
 	    var _didIteratorError = false;
@@ -37369,20 +37508,24 @@
 	      this.voucher = voucher;
 	      return;
 	    }
-	    if (voucher.calculateDiscount(this) > this.voucher.calculateDiscount(this)) {
+	    if (voucher.calculateDiscount(this.items) > this.voucher.calculateDiscount(this.items)) {
 	      this.voucher = voucher;
 	    }
 	  },
 	
-	  getVoucherDiscount: function getVoucherDiscount(shoppingBasket) {
+	  clearVoucher: function clearVoucher() {
+	    this.voucher = null;
+	  },
+	
+	  getVoucherDiscount: function getVoucherDiscount() {
 	    if (this.voucher === null || this.items.length === 0) {
 	      return 0;
 	    }
-	    return this.voucher.calculateDiscount(shoppingBasket);
+	    return this.voucher.calculateDiscount(this.items);
 	  },
 	
 	  isVoucherValid: function isVoucherValid() {
-	    return getVoucherDiscount() != 0;
+	    return this.getVoucherDiscount() != 0;
 	  },
 	
 	  createFilters: function createFilters() {
@@ -37417,6 +37560,22 @@
 	};
 	
 	module.exports = ShoppingBasket;
+
+/***/ },
+/* 175 */,
+/* 176 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	var DiscountVoucher = function DiscountVoucher(code, calculateDiscount) {
+	  this.code = code;
+	  this.calculateDiscount = calculateDiscount;
+	};
+	
+	DiscountVoucher.prototype = {};
+	
+	module.exports = DiscountVoucher;
 
 /***/ }
 /******/ ]);
