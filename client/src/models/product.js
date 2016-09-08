@@ -5,6 +5,7 @@ var Product = function(params){
   this.categorys = params.category,
   this.colour = params.colour,
   this.price = parseInt(params.price)
+  this.quantity = parseInt(params.quantity)
 }
 
 Product.prototype = {

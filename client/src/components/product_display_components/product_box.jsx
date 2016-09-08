@@ -7,6 +7,10 @@ var ProductBox = React.createClass({
     this.props.addItemToBasket(this.props.product)
   },
 
+  checkStockLevel: function(){
+    return this.props.product.quantity === 0
+  },
+
   render: function(){
     return(
         <div className="row" id='product-box'>
@@ -16,7 +20,7 @@ var ProductBox = React.createClass({
         </div>
 
         <div className="row">
-          <button onClick={this.handleClick} id="product-button">Add</button>
+          <button disabled={this.checkStockLevel()} onClick={this.handleClick} id="product-button">Add</button>
         </div>
 
           {this.props.product.name}

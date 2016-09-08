@@ -8,7 +8,9 @@ var ShoppingBasket = function(){
 ShoppingBasket.prototype = {
 
   addItem: function(product){
-    this.items.push(product)
+    if(product.quantity > 0){
+      this.items.push(product)
+    }
   },
 
   removeItem: function(product){
@@ -44,13 +46,14 @@ ShoppingBasket.prototype = {
   },
 
   addDiscountVoucher: function(voucher){
-    if(this.voucher === null){
-      this.voucher = voucher
-      return
-    }
-    if(voucher.calculateDiscount(this.items) > this.voucher.calculateDiscount(this.items)){
-      this.voucher = voucher
-    }
+    this.voucher = voucher
+    // if(this.voucher === null){
+    //   this.voucher = voucher
+    //   return
+    // }
+    // if(voucher.calculateDiscount(this.items) > this.voucher.calculateDiscount(this.items)){
+    //   this.voucher = voucher
+    // }
   },
 
   clearVoucher: function(){

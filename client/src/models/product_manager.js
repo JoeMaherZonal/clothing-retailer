@@ -15,25 +15,29 @@ ProductManager.prototype = {
     this.products.push(new Product(params))
   },
 
+  decreaseQuantity: function(product){
+    var product = this.findProduct(product)
+    if(product.quantity < 1){return}
+    var index = this.products.indexOf(product)
+    this.products[index].quantity -= 1
+
+  },
+
   removeProduct: function(product){
     var index = this.products.indexOf(product)
     this.products.splice(index, 1)
   },
 
   productsOfCat: function(category){
-    var filteredProducts = this.products.filter(function(p){
-      return p.isOfCategory(category)
+    var filteredProducts = this.products.filter(function(product){
+      return product.isOfCategory(category)
     })
     return filteredProducts
   },
 
-  productByName: function(name){
-    if(this.products.length === 0){return}
-    for(product of this.products){
-      if(product.name === name){
-        return product
-      }
-    }
+  findProduct: function(product){
+    var index = this.products.indexOf(product)
+    return this.products[index]
   }
 
 }

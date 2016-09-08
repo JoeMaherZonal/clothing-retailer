@@ -4,7 +4,7 @@ var TitleBox = React.createClass({
 
   render: function(){
     return(
-      <h3>Clothing Retailer</h3>
+      <h1>Clothing Retailer</h1>
       )}
 
   })

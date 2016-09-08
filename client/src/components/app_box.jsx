@@ -39,7 +39,10 @@ var AppBox = React.createClass({
 
   addItemToBasket: function(product) {
     var shoppingBasket = this.state.shoppingBasket
+    var productManager = this.state.productManager
     shoppingBasket.addItem(product)
+    productManager.decreaseQuantity(product)
+    this.setState({productManager: productManager})
     this.setState({shoppingBasket: shoppingBasket})
   },
 
@@ -100,7 +103,7 @@ var AppBox = React.createClass({
   createProductManager: function(data){
     var productManager = new ProductManager()
     for(var product of data){
-      productManager.addProduct({name: product.name, price: product.price, category: product.category, colour: product.colour})
+      productManager.addProduct({name: product.name, price: product.price, category: product.category, colour: product.colour, quantity: product.quantity})
     }
     this.setState({productManager: productManager})
   },
@@ -165,7 +168,6 @@ var AppBox = React.createClass({
     var discountVoucher3 = new DiscountVoucher("15OFF", function(items){
       var totalSpend = _.sumBy(items, function(product) { return product.price; })
       var hasItemWithCategory = false
-      console.log("item",items)
       for(var item of items){
         for(var cat of item.categorys){
           if(cat === "footwear"){
@@ -173,7 +175,6 @@ var AppBox = React.createClass({
           }
         }
       }
-      console.log("HAS:",hasItemWithCategory)
       if(totalSpend > 75 && hasItemWithCategory){
         return 15;
       }else{
@@ -185,12 +186,13 @@ var AppBox = React.createClass({
   },
 
   render: function(){
+
     return(
       <div className="row" id='app-container'>
       <div className="col-12">
 
-        <div className="row">
-          <div className="col-12">
+        <div className="row" id="titlecontainer">
+          <div className="col-12" id="titlecontainer">
             <TitleBox />
           </div>
         </div>

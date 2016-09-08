@@ -19792,7 +19792,10 @@
 	
 	  addItemToBasket: function addItemToBasket(product) {
 	    var shoppingBasket = this.state.shoppingBasket;
+	    var productManager = this.state.productManager;
 	    shoppingBasket.addItem(product);
+	    productManager.decreaseQuantity(product);
+	    this.setState({ productManager: productManager });
 	    this.setState({ shoppingBasket: shoppingBasket });
 	  },
 	
@@ -19882,7 +19885,7 @@
 	      for (var _iterator2 = data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	        var product = _step2.value;
 	
-	        productManager.addProduct({ name: product.name, price: product.price, category: product.category, colour: product.colour });
+	        productManager.addProduct({ name: product.name, price: product.price, category: product.category, colour: product.colour, quantity: product.quantity });
 	      }
 	    } catch (err) {
 	      _didIteratorError2 = true;
@@ -20012,7 +20015,6 @@
 	        return product.price;
 	      });
 	      var hasItemWithCategory = false;
-	      console.log("item", items);
 	      var _iteratorNormalCompletion5 = true;
 	      var _didIteratorError5 = false;
 	      var _iteratorError5 = undefined;
@@ -20062,7 +20064,6 @@
 	        }
 	      }
 	
-	      console.log("HAS:", hasItemWithCategory);
 	      if (totalSpend > 75 && hasItemWithCategory) {
 	        return 15;
 	      } else {
@@ -20074,6 +20075,7 @@
 	  },
 	
 	  render: function render() {
+	
 	    return React.createElement(
 	      'div',
 	      { className: 'row', id: 'app-container' },
@@ -20082,10 +20084,10 @@
 	        { className: 'col-12' },
 	        React.createElement(
 	          'div',
-	          { className: 'row' },
+	          { className: 'row', id: 'titlecontainer' },
 	          React.createElement(
 	            'div',
-	            { className: 'col-12' },
+	            { className: 'col-12', id: 'titlecontainer' },
 	            React.createElement(TitleBox, null)
 	          )
 	        ),
@@ -20129,7 +20131,7 @@
 	
 	  render: function render() {
 	    return React.createElement(
-	      'h3',
+	      'h1',
 	      null,
 	      'Clothing Retailer'
 	    );
@@ -20185,9 +20187,10 @@
 	      React.createElement(
 	        'div',
 	        { className: 'row' },
+	        React.createElement('div', { className: 'col-1' }),
 	        React.createElement(
 	          'div',
-	          { className: 'col-6', id: 'filter-button-container' },
+	          { className: 'col-5', id: 'filter-button-container' },
 	          React.createElement(
 	            'button',
 	            { onClick: this.handleFilterClick, className: 'filter-button' },
@@ -20196,13 +20199,14 @@
 	        ),
 	        React.createElement(
 	          'div',
-	          { className: 'col-6', id: 'basket-button-container' },
+	          { className: 'col-5', id: 'basket-button-container' },
 	          React.createElement(
 	            'button',
 	            { onClick: this.handleBasketClick, className: 'basket-button' },
-	            'Basket'
+	            this.props.shoppingBasket.items.length
 	          )
 	        ),
+	        React.createElement('div', { className: 'col-1' }),
 	        React.createElement(
 	          'div',
 	          { className: this.filterOptionsClassName, id: 'filter-options' },
@@ -20430,6 +20434,8 @@
 	  displayName: "VoucherBox",
 	
 	
+	  voucherMessageClass: "invalid-voucher-message-hide",
+	
 	  getInitialState: function getInitialState() {
 	    return { voucherCode: null };
 	  },
@@ -20445,6 +20451,15 @@
 	    this.chechIfVoucherIsValid();
 	  },
 	
+	  showInvalidVoucherMessage: function showInvalidVoucherMessage() {
+	    this.voucherMessageClass = "valid-voucher-message";
+	    this.forceUpdate();
+	    setTimeout(function () {
+	      this.voucherMessageClass = "invalid-voucher-message-hide";
+	      this.forceUpdate();
+	    }.bind(this), 2000);
+	  },
+	
 	  chechIfVoucherIsValid: function chechIfVoucherIsValid() {
 	    var shoppingBasket = this.props.shoppingBasket;
 	    if (shoppingBasket.voucher && shoppingBasket.isVoucherValid()) {
@@ -20453,25 +20468,39 @@
 	      shoppingBasket.clearVoucher();
 	      this.props.updateShoppingBasket(shoppingBasket);
 	      console.log("invalid voucher removing");
+	      this.showInvalidVoucherMessage();
 	    }
 	  },
 	
 	  render: function render() {
 	    return React.createElement(
 	      "div",
-	      { className: "row", id: "voucher-box" },
+	      null,
 	      React.createElement(
 	        "div",
-	        { className: "col-6" },
-	        React.createElement("input", { type: "text", placeholder: "voucher code", onChange: this.handleChange })
+	        { className: "row", id: "voucher-box" },
+	        React.createElement(
+	          "div",
+	          { className: "col-6" },
+	          React.createElement("input", { type: "text", placeholder: "voucher code", onChange: this.handleChange })
+	        ),
+	        React.createElement(
+	          "div",
+	          { className: "col-6" },
+	          React.createElement(
+	            "button",
+	            { onClick: this.handleClick },
+	            "Apply"
+	          )
+	        )
 	      ),
 	      React.createElement(
 	        "div",
-	        { className: "col-6" },
+	        { className: "row" },
 	        React.createElement(
-	          "button",
-	          { onClick: this.handleClick },
-	          "Apply"
+	          "p",
+	          { className: this.voucherMessageClass },
+	          "You entered an invalid voucher"
 	        )
 	      )
 	    );
@@ -20529,6 +20558,10 @@
 	    this.props.addItemToBasket(this.props.product);
 	  },
 	
+	  checkStockLevel: function checkStockLevel() {
+	    return this.props.product.quantity === 0;
+	  },
+	
 	  render: function render() {
 	    return React.createElement(
 	      'div',
@@ -20543,7 +20576,7 @@
 	        { className: 'row' },
 	        React.createElement(
 	          'button',
-	          { onClick: this.handleClick, id: 'product-button' },
+	          { disabled: this.checkStockLevel(), onClick: this.handleClick, id: 'product-button' },
 	          'Add'
 	        )
 	      ),
@@ -20578,48 +20611,30 @@
 	    this.products.push(new Product(params));
 	  },
 	
+	  decreaseQuantity: function decreaseQuantity(product) {
+	    var product = this.findProduct(product);
+	    if (product.quantity < 1) {
+	      return;
+	    }
+	    var index = this.products.indexOf(product);
+	    this.products[index].quantity -= 1;
+	  },
+	
 	  removeProduct: function removeProduct(product) {
 	    var index = this.products.indexOf(product);
 	    this.products.splice(index, 1);
 	  },
 	
 	  productsOfCat: function productsOfCat(category) {
-	    var filteredProducts = this.products.filter(function (p) {
-	      return p.isOfCategory(category);
+	    var filteredProducts = this.products.filter(function (product) {
+	      return product.isOfCategory(category);
 	    });
 	    return filteredProducts;
 	  },
 	
-	  productByName: function productByName(name) {
-	    if (this.products.length === 0) {
-	      return;
-	    }
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
-	
-	    try {
-	      for (var _iterator = this.products[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	        product = _step.value;
-	
-	        if (product.name === name) {
-	          return product;
-	        }
-	      }
-	    } catch (err) {
-	      _didIteratorError = true;
-	      _iteratorError = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion && _iterator.return) {
-	          _iterator.return();
-	        }
-	      } finally {
-	        if (_didIteratorError) {
-	          throw _iteratorError;
-	        }
-	      }
-	    }
+	  findProduct: function findProduct(product) {
+	    var index = this.products.indexOf(product);
+	    return this.products[index];
 	  }
 	
 	};
@@ -20634,6 +20649,7 @@
 	
 	var Product = function Product(params) {
 	  this.name = params.name, this.categorys = params.category, this.colour = params.colour, this.price = parseInt(params.price);
+	  this.quantity = parseInt(params.quantity);
 	};
 	
 	Product.prototype = {
@@ -37444,7 +37460,9 @@
 	ShoppingBasket.prototype = {
 	
 	  addItem: function addItem(product) {
-	    this.items.push(product);
+	    if (product.quantity > 0) {
+	      this.items.push(product);
+	    }
 	  },
 	
 	  removeItem: function removeItem(product) {
@@ -37504,13 +37522,14 @@
 	  },
 	
 	  addDiscountVoucher: function addDiscountVoucher(voucher) {
-	    if (this.voucher === null) {
-	      this.voucher = voucher;
-	      return;
-	    }
-	    if (voucher.calculateDiscount(this.items) > this.voucher.calculateDiscount(this.items)) {
-	      this.voucher = voucher;
-	    }
+	    this.voucher = voucher;
+	    // if(this.voucher === null){
+	    //   this.voucher = voucher
+	    //   return
+	    // }
+	    // if(voucher.calculateDiscount(this.items) > this.voucher.calculateDiscount(this.items)){
+	    //   this.voucher = voucher
+	    // }
 	  },
 	
 	  clearVoucher: function clearVoucher() {
