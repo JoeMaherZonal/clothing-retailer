@@ -46,6 +46,13 @@ $ npm start
 ```
 visit [http://localhost:5000](http://localhost:5000)
 
+### Using the website
+
+- To add an item to the shopping basket click add below the item discription
+- To view the basket toggle the basket icon in the top right corner
+- Remove an item by clicking the x button
+- Use the codes "5OFF", "10OFF" and "15OFF" as valid voucher codes to apply to your order
+
 ### Technologies Used
 
 * [node.js](http://nodejs.org)
