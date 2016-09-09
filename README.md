@@ -56,6 +56,7 @@ visit [http://localhost:5000](http://localhost:5000)
 ### Tests
 
 ```sh
+$ cd client
 $ npm test
 ```
 
