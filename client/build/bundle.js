@@ -19756,13 +19756,12 @@
 	'use strict';
 	
 	var React = __webpack_require__(1);
-	var TitleBox = __webpack_require__(160);
-	var OptionsBox = __webpack_require__(161);
-	var ProductList = __webpack_require__(168);
-	var ProductManager = __webpack_require__(170);
-	var _ = __webpack_require__(172);
-	var ShoppingBasket = __webpack_require__(174);
-	var DiscountVoucher = __webpack_require__(176);
+	var OptionsBox = __webpack_require__(160);
+	var ProductList = __webpack_require__(167);
+	var ProductManager = __webpack_require__(169);
+	var _ = __webpack_require__(171);
+	var ShoppingBasket = __webpack_require__(173);
+	var DiscountVoucher = __webpack_require__(174);
 	
 	var AppBox = React.createClass({
 	  displayName: 'AppBox',
@@ -19770,10 +19769,8 @@
 	
 	  getInitialState: function getInitialState() {
 	    return {
-	      selectedFilters: [{ id: "men", selected: false }, { id: "women", selected: false }, { id: "casual", selected: false }, { id: "formal", selected: false }, { id: "footwear", selected: false }],
 	      productManager: null,
-	      shoppingBasket: new ShoppingBasket(),
-	      validVouchers: null
+	      shoppingBasket: new ShoppingBasket()
 	    };
 	  },
 	
@@ -19785,6 +19782,7 @@
 	      if (request.status === 200) {
 	        var data = JSON.parse(request.responseText);
 	        this.createProductManager(data);
+	        this.createValidVouchers();
 	      }
 	    }.bind(this);
 	    request.send(null);
@@ -19799,23 +19797,29 @@
 	    this.setState({ shoppingBasket: shoppingBasket });
 	  },
 	
-	  loadPreviousShoppingData: function loadPreviousShoppingData() {
-	    var previousShopping = JSON.parse(localStorage.getItem('shoppingBasket')) || [];
-	    var previousVoucher = JSON.parse(localStorage.getItem('voucher')) || null;
-	    var currentShoppingBasket = this.state.shoppingBasket;
-	    currentShoppingBasket.items = previousShopping;
-	    currentShoppingBasket.voucher = previousVoucher;
-	    this.setState({ shoppingBasket: currentShoppingBasket });
-	  },
+	  //TODO
+	  // loadPreviousShoppingData: function(){
+	  //   var previousShopping = JSON.parse(localStorage.getItem('shoppingBasket')) || []
+	  //   var previousVoucher = JSON.parse(localStorage.getItem('voucher')) || null
+	  //   var currentShoppingBasket = this.state.shoppingBasket
+	  //   currentShoppingBasket.items = previousShopping
+	  //   currentShoppingBasket.voucher = previousVoucher
+	  //   this.setState({shoppingBasket: currentShoppingBasket })
+	  // },
 	
-	  saveCurrentShopping: function saveCurrentShopping() {
-	    var currentShopping = this.state.shoppingBasket.items;
-	    var currentVoucher = this.state.shoppingBasket.voucher;
-	    localStorage.setItem('shoppingBasket', JSON.stringify(allResults));
-	  },
+	  // saveCurrentShopping: function(){
+	  //   var currentShopping = this.state.shoppingBasket.items
+	  //   var currentVoucher = this.state.shoppingBasket.voucher
+	  //   localStorage.setItem('shoppingBasket', JSON.stringify(allResults));
+	  // },
 	
 	  removeItemFromBasket: function removeItemFromBasket(product) {
 	    var shoppingBasket = this.state.shoppingBasket;
+	    var productManager = this.state.productManager;
+	    if (product.code) {
+	      shoppingBasket.clearVoucher();
+	    }
+	    productManager.returnProduct(product);
 	    shoppingBasket.removeItem(product);
 	    this.setState({ shoppingBasket: shoppingBasket });
 	  },
@@ -19828,28 +19832,37 @@
 	  readyState: function readyState() {
 	    this.createShoppingBasket();
 	    this.loadPreviousShoppingData();
-	    this.createValidVouchers();
 	  },
 	
 	  componentDidMount: function componentDidMount() {
 	    this.readyState();
 	    this.loadDataFromAPI();
-	    // setInterval(this.loadDataFromAPI, 500)
 	  },
 	
 	
 	  findVoucher: function findVoucher(code) {
+	    this.state.productManager.getVoucher(code);
+	  },
+	
+	  addVoucher: function addVoucher(code) {
+	    var shoppingBasket = this.state.shoppingBasket;
+	    if (this.findVoucher(code)) {
+	      shoppingBasket.addDiscountVoucher(this.findVoucher(code));
+	    }
+	    this.setState({ shoppingBasket: shoppingBasket });
+	  },
+	
+	  createProductManager: function createProductManager(data) {
+	    var productManager = new ProductManager();
 	    var _iteratorNormalCompletion = true;
 	    var _didIteratorError = false;
 	    var _iteratorError = undefined;
 	
 	    try {
-	      for (var _iterator = this.state.validVouchers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	        var voucher = _step.value;
+	      for (var _iterator = data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	        var product = _step.value;
 	
-	        if (voucher.code === code) {
-	          return voucher;
-	        }
+	        productManager.addProduct({ name: product.name, price: product.price, category: product.category, colour: product.colour, quantity: product.quantity, discount: product.discount });
 	      }
 	    } catch (err) {
 	      _didIteratorError = true;
@@ -19865,141 +19878,34 @@
 	        }
 	      }
 	    }
-	  },
-	
-	  addVoucher: function addVoucher(code) {
-	    var shoppingBasket = this.state.shoppingBasket;
-	    if (this.findVoucher(code)) {
-	      shoppingBasket.addDiscountVoucher(this.findVoucher(code));
-	    }
-	    this.setState({ shoppingBasket: shoppingBasket });
-	  },
-	
-	  createProductManager: function createProductManager(data) {
-	    var productManager = new ProductManager();
-	    var _iteratorNormalCompletion2 = true;
-	    var _didIteratorError2 = false;
-	    var _iteratorError2 = undefined;
-	
-	    try {
-	      for (var _iterator2 = data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	        var product = _step2.value;
-	
-	        productManager.addProduct({ name: product.name, price: product.price, category: product.category, colour: product.colour, quantity: product.quantity });
-	      }
-	    } catch (err) {
-	      _didIteratorError2 = true;
-	      _iteratorError2 = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	          _iterator2.return();
-	        }
-	      } finally {
-	        if (_didIteratorError2) {
-	          throw _iteratorError2;
-	        }
-	      }
-	    }
 	
 	    this.setState({ productManager: productManager });
 	  },
 	
-	  updateFilter: function updateFilter(target) {
-	    var filter = this.state.selectedFilters.map(function (filter) {
-	      var selected = filter.selected;
-	      if (target.id === filter.id) {
-	        if (selected) {
-	          selected = false;
-	        } else {
-	          selected = true;
-	        }
-	      }
-	      return {
-	        id: filter.id,
-	        selected: selected
-	      };
-	    });
-	    this.setState({ selectedFilters: filter });
-	  },
-	
 	  productsToDisplay: function productsToDisplay() {
 	    var productManager = this.state.productManager || new ProductManager();
-	    if (!this.checkForNoFilteres()) {
-	      return productManager.products;
-	    }
-	    var filteredProducts = [];
-	    var _iteratorNormalCompletion3 = true;
-	    var _didIteratorError3 = false;
-	    var _iteratorError3 = undefined;
-	
-	    try {
-	      for (var _iterator3 = this.state.selectedFilters[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	        var filter = _step3.value;
-	
-	        if (filter.selected) {
-	          filteredProducts = filteredProducts.concat(productManager.productsOfCat(filter.id));
-	        }
-	      }
-	    } catch (err) {
-	      _didIteratorError3 = true;
-	      _iteratorError3 = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	          _iterator3.return();
-	        }
-	      } finally {
-	        if (_didIteratorError3) {
-	          throw _iteratorError3;
-	        }
-	      }
-	    }
-	
-	    return _.uniqBy(filteredProducts, function (element) {
-	      return element.name;
-	    });
-	  },
-	
-	  checkForNoFilteres: function checkForNoFilteres() {
-	    var _iteratorNormalCompletion4 = true;
-	    var _didIteratorError4 = false;
-	    var _iteratorError4 = undefined;
-	
-	    try {
-	      for (var _iterator4 = this.state.selectedFilters[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	        var filter = _step4.value;
-	
-	        if (filter.selected) {
-	          return true;
-	        }
-	      }
-	    } catch (err) {
-	      _didIteratorError4 = true;
-	      _iteratorError4 = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	          _iterator4.return();
-	        }
-	      } finally {
-	        if (_didIteratorError4) {
-	          throw _iteratorError4;
-	        }
-	      }
-	    }
-	
-	    return false;
+	    return productManager.products;
 	  },
 	
 	  updateShoppingBasket: function updateShoppingBasket(shoppingBasket) {
 	    this.setState({ shoppingBasket: shoppingBasket });
 	  },
 	
+	  updateProductManager: function updateProductManager(productManager) {
+	    this.setState({ productManager: productManager });
+	  },
+	
+	  //TODO - isolate and tidyup
 	  createValidVouchers: function createValidVouchers() {
-	    var discountVoucher1 = new DiscountVoucher("5OFF", function () {
-	      return 5;
-	    });
+	    var discountVoucher1 = new DiscountVoucher("5OFF", function (items) {
+	      var totalSpend = _.sumBy(items, function (product) {
+	        return product.price;
+	      });
+	      if (totalSpend > 5) {
+	        return 5;
+	      }
+	      return 0;
+	    }, "£5 off any order");
 	    var discountVoucher2 = new DiscountVoucher("10OFF", function (items) {
 	      var totalSpend = _.sumBy(items, function (o) {
 	        return o.price;
@@ -20009,57 +19915,36 @@
 	      } else {
 	        return 0;
 	      }
-	    });
+	    }, "£10 off when you spend £50");
 	    var discountVoucher3 = new DiscountVoucher("15OFF", function (items) {
 	      var totalSpend = _.sumBy(items, function (product) {
 	        return product.price;
 	      });
 	      var hasItemWithCategory = false;
-	      var _iteratorNormalCompletion5 = true;
-	      var _didIteratorError5 = false;
-	      var _iteratorError5 = undefined;
+	      var _iteratorNormalCompletion2 = true;
+	      var _didIteratorError2 = false;
+	      var _iteratorError2 = undefined;
 	
 	      try {
-	        for (var _iterator5 = items[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	          var item = _step5.value;
-	          var _iteratorNormalCompletion6 = true;
-	          var _didIteratorError6 = false;
-	          var _iteratorError6 = undefined;
+	        for (var _iterator2 = items[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	          var item = _step2.value;
 	
-	          try {
-	            for (var _iterator6 = item.categorys[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	              var cat = _step6.value;
-	
-	              if (cat === "footwear") {
-	                hasItemWithCategory = true;
-	              }
-	            }
-	          } catch (err) {
-	            _didIteratorError6 = true;
-	            _iteratorError6 = err;
-	          } finally {
-	            try {
-	              if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                _iterator6.return();
-	              }
-	            } finally {
-	              if (_didIteratorError6) {
-	                throw _iteratorError6;
-	              }
-	            }
+	          var catArray = item.categorys.split(/(\s)/);
+	          if (catArray[2] === "Footwear") {
+	            hasItemWithCategory = true;
 	          }
 	        }
 	      } catch (err) {
-	        _didIteratorError5 = true;
-	        _iteratorError5 = err;
+	        _didIteratorError2 = true;
+	        _iteratorError2 = err;
 	      } finally {
 	        try {
-	          if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	            _iterator5.return();
+	          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	            _iterator2.return();
 	          }
 	        } finally {
-	          if (_didIteratorError5) {
-	            throw _iteratorError5;
+	          if (_didIteratorError2) {
+	            throw _iteratorError2;
 	          }
 	        }
 	      }
@@ -20070,8 +19955,10 @@
 	        //invalid
 	        return 0;
 	      }
-	    });
-	    this.setState({ validVouchers: [discountVoucher1, discountVoucher2, discountVoucher3] });
+	    }, "£15 off when you buy footwear and spend £75");
+	    var productManager = this.state.productManager;
+	    productManager.setVouchers([discountVoucher1, discountVoucher2, discountVoucher3]);
+	    this.setState({ productManager: productManager });
 	  },
 	
 	  render: function render() {
@@ -20084,20 +19971,11 @@
 	        { className: 'col-12' },
 	        React.createElement(
 	          'div',
-	          { className: 'row', id: 'titlecontainer' },
-	          React.createElement(
-	            'div',
-	            { className: 'col-12', id: 'titlecontainer' },
-	            React.createElement(TitleBox, null)
-	          )
-	        ),
-	        React.createElement(
-	          'div',
 	          { className: 'row' },
 	          React.createElement(
 	            'div',
 	            { className: 'col-12' },
-	            React.createElement(OptionsBox, { updateFilter: this.updateFilter, shoppingBasket: this.state.shoppingBasket, removeItemFromBasket: this.removeItemFromBasket, addVoucher: this.addVoucher, updateShoppingBasket: this.updateShoppingBasket })
+	            React.createElement(OptionsBox, { updateFilter: this.updateFilter, shoppingBasket: this.state.shoppingBasket, removeItemFromBasket: this.removeItemFromBasket, addVoucher: this.addVoucher, updateShoppingBasket: this.updateShoppingBasket, productManager: this.state.productManager, updateProductManager: this.updateProductManager })
 	          )
 	        ),
 	        React.createElement(
@@ -20124,54 +20002,16 @@
 	'use strict';
 	
 	var React = __webpack_require__(1);
-	
-	var TitleBox = React.createClass({
-	  displayName: 'TitleBox',
-	
-	
-	  render: function render() {
-	    return React.createElement(
-	      'h1',
-	      null,
-	      'Clothing Retailer'
-	    );
-	  }
-	
-	});
-	
-	module.exports = TitleBox;
-
-/***/ },
-/* 161 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(1);
-	var FilterOptions = __webpack_require__(162);
-	var BasketBox = __webpack_require__(163);
+	var FilterOptions = __webpack_require__(161);
+	var BasketBox = __webpack_require__(162);
 	
 	var OptionsBox = React.createClass({
 	  displayName: 'OptionsBox',
 	
 	
-	  filterOptionsClassName: "row filter-options-hide",
 	  basketContainerClassName: "row basket-container-hide",
 	
-	  handleFilterClick: function handleFilterClick() {
-	    console.log("filter clicked");
-	    this.basketContainerClassName = "row basket-container-hide";
-	    if (this.filterOptionsClassName === "row") {
-	      this.filterOptionsClassName = "row filter-options-hide";
-	    } else {
-	      this.filterOptionsClassName = "row";
-	    }
-	    this.forceUpdate();
-	  },
-	
 	  handleBasketClick: function handleBasketClick() {
-	    console.log("basket clicked");
-	    this.filterOptionsClassName = "row filter-options-hide";
 	    if (this.basketContainerClassName === "row") {
 	      this.basketContainerClassName = "row basket-container-hide";
 	    } else {
@@ -20183,40 +20023,37 @@
 	  render: function render() {
 	    return React.createElement(
 	      'div',
-	      { className: 'col-12', id: 'options-box' },
+	      { className: 'row' },
 	      React.createElement(
 	        'div',
-	        { className: 'row' },
+	        { className: 'row', id: 'options-box' },
 	        React.createElement('div', { className: 'col-1' }),
 	        React.createElement(
 	          'div',
-	          { className: 'col-5', id: 'filter-button-container' },
+	          { className: 'col-6' },
 	          React.createElement(
-	            'button',
-	            { onClick: this.handleFilterClick, className: 'filter-button' },
-	            'Filter'
+	            'h1',
+	            null,
+	            'Clothing Retailer'
 	          )
 	        ),
 	        React.createElement(
 	          'div',
-	          { className: 'col-5', id: 'basket-button-container' },
+	          { className: 'col-4', id: 'basket-button-container' },
 	          React.createElement(
 	            'button',
 	            { onClick: this.handleBasketClick, className: 'basket-button' },
 	            this.props.shoppingBasket.items.length
 	          )
 	        ),
-	        React.createElement('div', { className: 'col-1' }),
-	        React.createElement(
-	          'div',
-	          { className: this.filterOptionsClassName, id: 'filter-options' },
-	          React.createElement(FilterOptions, { updateFilter: this.props.updateFilter })
-	        ),
-	        React.createElement(
-	          'div',
-	          { className: this.basketContainerClassName, id: 'basket-container' },
-	          React.createElement(BasketBox, { removeItemFromBasket: this.props.removeItemFromBasket, shoppingBasket: this.props.shoppingBasket, addVoucher: this.props.addVoucher, updateShoppingBasket: this.props.updateShoppingBasket })
-	        )
+	        React.createElement('div', { className: 'col-1' })
+	      ),
+	      React.createElement('hr', null),
+	      React.createElement(
+	        'div',
+	        { className: this.basketContainerClassName, id: 'basket-container' },
+	        React.createElement(BasketBox, { removeItemFromBasket: this.props.removeItemFromBasket, shoppingBasket: this.props.shoppingBasket, addVoucher: this.props.addVoucher, updateShoppingBasket: this.props.updateShoppingBasket, productManager: this.props.productManager, updateProductManager: this.props.updateProductManager }),
+	        React.createElement('hr', null)
 	      )
 	    );
 	  }
@@ -20226,7 +20063,7 @@
 	module.exports = OptionsBox;
 
 /***/ },
-/* 162 */
+/* 161 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20271,15 +20108,15 @@
 	module.exports = FilterOptions;
 
 /***/ },
-/* 163 */
+/* 162 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var React = __webpack_require__(1);
-	var BasketList = __webpack_require__(164);
-	var TotalBox = __webpack_require__(166);
-	var VoucherBox = __webpack_require__(167);
+	var BasketList = __webpack_require__(163);
+	var TotalBox = __webpack_require__(165);
+	var VoucherBox = __webpack_require__(166);
 	
 	var BasketBox = React.createClass({
 	  displayName: 'BasketBox',
@@ -20298,7 +20135,7 @@
 	          React.createElement(
 	            'div',
 	            { className: 'col-12' },
-	            React.createElement(BasketList, { removeItemFromBasket: this.props.removeItemFromBasket, shoppingItems: this.props.shoppingBasket.items })
+	            React.createElement(BasketList, { removeItemFromBasket: this.props.removeItemFromBasket, shoppingBasket: this.props.shoppingBasket })
 	          )
 	        ),
 	        React.createElement(
@@ -20316,7 +20153,7 @@
 	          React.createElement(
 	            'div',
 	            { className: 'col-12' },
-	            React.createElement(VoucherBox, { shoppingBasket: this.props.shoppingBasket, addVoucher: this.props.addVoucher, updateShoppingBasket: this.props.updateShoppingBasket })
+	            React.createElement(VoucherBox, { shoppingBasket: this.props.shoppingBasket, addVoucher: this.props.addVoucher, updateShoppingBasket: this.props.updateShoppingBasket, productManager: this.props.productManager, updateProductManager: this.props.updateProductManager })
 	          )
 	        )
 	      )
@@ -20327,22 +20164,37 @@
 	module.exports = BasketBox;
 
 /***/ },
-/* 164 */
+/* 163 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var React = __webpack_require__(1);
-	var BasketItem = __webpack_require__(165);
+	var BasketItem = __webpack_require__(164);
+	var VoucherItem = __webpack_require__(175);
 	
 	var BasketList = React.createClass({
 	  displayName: 'BasketList',
 	
 	
-	  render: function render() {
-	    var shoppingNodes = this.props.shoppingItems.map(function (item, index) {
+	  buildBasketNodes: function buildBasketNodes() {
+	    var shoppingNodes = this.props.shoppingBasket.items.map(function (item, index) {
 	      return React.createElement(BasketItem, { removeItemFromBasket: this.props.removeItemFromBasket, key: index, item: item });
 	    }.bind(this));
+	    shoppingNodes = this.addVoucherNodes(shoppingNodes);
+	    return shoppingNodes;
+	  },
+	
+	  addVoucherNodes: function addVoucherNodes(shoppingNodes) {
+	    if (this.props.shoppingBasket.voucher) {
+	      shoppingNodes.push(React.createElement(VoucherItem, { removeItemFromBasket: this.props.removeItemFromBasket, voucher: this.props.shoppingBasket.voucher, key: shoppingNodes.length }));
+	      return shoppingNodes;
+	    }
+	    return shoppingNodes;
+	  },
+	
+	  render: function render() {
+	    var shoppingNodes = this.buildBasketNodes();
 	
 	    return React.createElement(
 	      'div',
@@ -20356,7 +20208,7 @@
 	module.exports = BasketList;
 
 /***/ },
-/* 165 */
+/* 164 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20377,15 +20229,39 @@
 	      { className: 'row', id: 'basket-item' },
 	      React.createElement(
 	        'div',
-	        { className: 'col-10' },
-	        this.props.item.name
+	        { className: 'col-10', id: 'basket-item-nodes' },
+	        React.createElement(
+	          'p',
+	          { className: 'basket-node', id: 'basket-item-name' },
+	          this.props.item.name
+	        ),
+	        React.createElement(
+	          'p',
+	          { className: 'basket-node', id: 'basket-item-colour' },
+	          this.props.item.colour
+	        ),
+	        React.createElement(
+	          'p',
+	          { className: 'basket-node', id: 'basket-item-cat' },
+	          this.props.item.categorys
+	        )
 	      ),
 	      React.createElement(
 	        'div',
-	        { className: 'col-2' },
+	        { className: 'col-1' },
+	        React.createElement(
+	          'p',
+	          { className: 'basket-node', id: 'basket-item-price' },
+	          '£',
+	          this.props.item.getPrice()
+	        )
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'col-1' },
 	        React.createElement(
 	          'button',
-	          { onClick: this.handleClick },
+	          { className: 'exitButton', onClick: this.handleClick },
 	          'X'
 	        )
 	      )
@@ -20397,24 +20273,43 @@
 	module.exports = BasketItem;
 
 /***/ },
-/* 166 */
+/* 165 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	var React = __webpack_require__(1);
 	
 	var TotalBox = React.createClass({
-	  displayName: 'TotalBox',
+	  displayName: "TotalBox",
 	
+	
+	  getSavings: function getSavings() {
+	    var savings = this.props.shoppingBasket.getDiscount();
+	    if (savings) {
+	      return "You saved £" + savings;
+	    }
+	    return null;
+	  },
 	
 	  render: function render() {
 	
+	    var savings = this.getSavings();
+	
 	    return React.createElement(
-	      'div',
-	      { className: 'row', id: 'total-box' },
-	      '£',
-	      this.props.shoppingBasket.totalPrice()
+	      "div",
+	      { className: "row", id: "total-box" },
+	      React.createElement(
+	        "p",
+	        { id: "basket-total" },
+	        "Basket Total £",
+	        this.props.shoppingBasket.totalPrice().toFixed(2)
+	      ),
+	      React.createElement(
+	        "p",
+	        { id: "savings" },
+	        savings
+	      )
 	    );
 	  }
 	
@@ -20423,7 +20318,7 @@
 	module.exports = TotalBox;
 
 /***/ },
-/* 167 */
+/* 166 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -20447,8 +20342,9 @@
 	
 	  handleClick: function handleClick() {
 	    console.log("button clicked");
+	    this.chechIfVoucherIsValid(this.state.voucherCode);
+	
 	    this.props.addVoucher(this.state.voucherCode);
-	    this.chechIfVoucherIsValid();
 	  },
 	
 	  showInvalidVoucherMessage: function showInvalidVoucherMessage() {
@@ -20460,14 +20356,16 @@
 	    }.bind(this), 2000);
 	  },
 	
-	  chechIfVoucherIsValid: function chechIfVoucherIsValid() {
+	  chechIfVoucherIsValid: function chechIfVoucherIsValid(code) {
+	    var productManager = this.props.productManager;
 	    var shoppingBasket = this.props.shoppingBasket;
-	    if (shoppingBasket.voucher && shoppingBasket.isVoucherValid()) {
+	    if (productManager.isVoucherValid(code)) {
 	      console.log("valid voucher");
+	      shoppingBasket.addDiscountVoucher(productManager.getVoucher(code));
 	    } else {
-	      shoppingBasket.clearVoucher();
 	      this.props.updateShoppingBasket(shoppingBasket);
-	      console.log("invalid voucher removing");
+	      this.props.updateProductManager(productManager);
+	      console.log("invalid voucher");
 	      this.showInvalidVoucherMessage();
 	    }
 	  },
@@ -20481,15 +20379,11 @@
 	        { className: "row", id: "voucher-box" },
 	        React.createElement(
 	          "div",
-	          { className: "col-6" },
-	          React.createElement("input", { type: "text", placeholder: "voucher code", onChange: this.handleChange })
-	        ),
-	        React.createElement(
-	          "div",
-	          { className: "col-6" },
+	          { className: "col-12" },
+	          React.createElement("input", { type: "text", placeholder: "voucher code", onChange: this.handleChange }),
 	          React.createElement(
 	            "button",
-	            { onClick: this.handleClick },
+	            { className: "voucher-button", onClick: this.handleClick },
 	            "Apply"
 	          )
 	        )
@@ -20511,13 +20405,13 @@
 	module.exports = VoucherBox;
 
 /***/ },
-/* 168 */
+/* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var React = __webpack_require__(1);
-	var ProductBox = __webpack_require__(169);
+	var ProductBox = __webpack_require__(168);
 	
 	var ProductList = React.createClass({
 	  displayName: 'ProductList',
@@ -20542,17 +20436,25 @@
 	module.exports = ProductList;
 
 /***/ },
-/* 169 */
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	
 	var React = __webpack_require__(1);
-	var ProductList = __webpack_require__(168);
+	var ProductList = __webpack_require__(167);
 	
 	var ProductBox = React.createClass({
 	  displayName: 'ProductBox',
 	
+	
+	  discount: "",
+	
+	  getInitialState: function getInitialState() {
+	    return { discount: 0 };
+	  },
 	
 	  handleClick: function handleClick() {
 	    this.props.addItemToBasket(this.props.product);
@@ -20563,24 +20465,103 @@
 	  },
 	
 	  render: function render() {
+	    var originalPrice = null;
+	    if (this.props.product.discount > 0) {
+	      originalPrice = "£" + this.props.product.price;
+	    }
 	    return React.createElement(
 	      'div',
 	      { className: 'row', id: 'product-box' },
 	      React.createElement(
 	        'div',
-	        { className: 'row' },
-	        React.createElement('img', { id: 'product-image', src: 'images/shirticon.png' })
-	      ),
-	      React.createElement(
-	        'div',
-	        { className: 'row' },
+	        { className: 'col-12' },
 	        React.createElement(
-	          'button',
-	          { disabled: this.checkStockLevel(), onClick: this.handleClick, id: 'product-button' },
-	          'Add'
+	          'div',
+	          { className: 'row' },
+	          React.createElement(
+	            'div',
+	            { className: 'col-12' },
+	            React.createElement('img', { id: 'product-image', src: 'images/shirticon.png' })
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'row' },
+	          React.createElement(
+	            'div',
+	            { className: 'col-12' },
+	            React.createElement(
+	              'p',
+	              { id: 'product-box-name' },
+	              this.props.product.name
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'row' },
+	          React.createElement(
+	            'div',
+	            { className: 'col-12' },
+	            React.createElement(
+	              'p',
+	              { id: 'product-box-cat' },
+	              this.props.product.categorys
+	            ),
+	            React.createElement(
+	              'p',
+	              { id: 'product-box-colour' },
+	              this.props.product.colour
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'row' },
+	          React.createElement(
+	            'div',
+	            { className: 'col-12' },
+	            React.createElement(
+	              'p',
+	              { id: 'product-box-quantity' },
+	              this.props.product.quantity,
+	              ' available'
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'row' },
+	          React.createElement(
+	            'div',
+	            { className: 'col-12', id: 'price-display' },
+	            React.createElement(
+	              'p',
+	              { id: 'product-box-discount' },
+	              originalPrice
+	            ),
+	            React.createElement(
+	              'p',
+	              { id: 'product-box-price' },
+	              '£',
+	              this.props.product.getPrice()
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'row' },
+	          React.createElement(
+	            'div',
+	            { className: 'col-12' },
+	            React.createElement(
+	              'button',
+	              _defineProperty({ id: 'product-box-add-button', disabled: this.checkStockLevel(), onClick: this.handleClick }, 'id', 'product-button'),
+	              'Add'
+	            )
+	          )
 	        )
-	      ),
-	      this.props.product.name
+	      )
 	    );
 	  }
 	
@@ -20589,22 +20570,22 @@
 	module.exports = ProductBox;
 
 /***/ },
-/* 170 */
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var Product = __webpack_require__(171);
-	var _ = __webpack_require__(172);
+	var Product = __webpack_require__(170);
+	var _ = __webpack_require__(171);
 	
 	var ProductManager = function ProductManager() {
 	  this.products = [];
+	  this.validVouchers = [];
 	};
 	
 	ProductManager.prototype = {
 	
 	  addProduct: function addProduct(params) {
-	    //prevents invalid objects becoming stock
 	    if (!params.name || !params.price || !params.category || !params.colour) {
 	      return;
 	    }
@@ -20618,6 +20599,13 @@
 	    }
 	    var index = this.products.indexOf(product);
 	    this.products[index].quantity -= 1;
+	  },
+	
+	  returnProduct: function returnProduct(product) {
+	    if (product.quantity) {
+	      var index = this.products.indexOf(product);
+	      this.products[index].quantity += 1;
+	    }
 	  },
 	
 	  removeProduct: function removeProduct(product) {
@@ -20635,6 +20623,79 @@
 	  findProduct: function findProduct(product) {
 	    var index = this.products.indexOf(product);
 	    return this.products[index];
+	  },
+	
+	  setVouchers: function setVouchers(vouchers) {
+	    this.validVouchers = vouchers;
+	  },
+	
+	  getVoucher: function getVoucher(code) {
+	    if (this.isVoucherValid(code)) {
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+	
+	      try {
+	        for (var _iterator = this.validVouchers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var voucher = _step.value;
+	
+	          if (code === voucher.code) {
+	            return voucher;
+	          }
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
+	      }
+	    }
+	  },
+	
+	  getVoucherDiscount: function getVoucherDiscount(voucher) {
+	    if (!voucher) {
+	      return;
+	    }
+	    return voucher.calculateDiscount(this.items);
+	  },
+	
+	  isVoucherValid: function isVoucherValid(code) {
+	    var _iteratorNormalCompletion2 = true;
+	    var _didIteratorError2 = false;
+	    var _iteratorError2 = undefined;
+	
+	    try {
+	      for (var _iterator2 = this.validVouchers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	        var voucher = _step2.value;
+	
+	        if (code === voucher.code) {
+	          return true;
+	        }
+	      }
+	    } catch (err) {
+	      _didIteratorError2 = true;
+	      _iteratorError2 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	          _iterator2.return();
+	        }
+	      } finally {
+	        if (_didIteratorError2) {
+	          throw _iteratorError2;
+	        }
+	      }
+	    }
+	
+	    return false;
 	  }
 	
 	};
@@ -20642,14 +20703,15 @@
 	module.exports = ProductManager;
 
 /***/ },
-/* 171 */
+/* 170 */
 /***/ function(module, exports) {
 
 	"use strict";
 	
 	var Product = function Product(params) {
-	  this.name = params.name, this.categorys = params.category, this.colour = params.colour, this.price = parseInt(params.price);
-	  this.quantity = parseInt(params.quantity);
+	  this.name = params.name, this.categorys = params.category, this.colour = params.colour, this.price = parseFloat(params.price);
+	  this.quantity = params.quantity;
+	  this.discount = parseFloat(params.discount);
 	};
 	
 	Product.prototype = {
@@ -20683,6 +20745,11 @@
 	    }
 	
 	    return false;
+	  },
+	
+	  getPrice: function getPrice() {
+	    var price = this.price - this.discount;
+	    return price.toFixed(2);
 	  }
 	
 	};
@@ -20690,7 +20757,7 @@
 	module.exports = Product;
 
 /***/ },
-/* 172 */
+/* 171 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -37427,10 +37494,10 @@
 	  }
 	}.call(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(173)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(172)(module)))
 
 /***/ },
-/* 173 */
+/* 172 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -37446,12 +37513,12 @@
 
 
 /***/ },
-/* 174 */
+/* 173 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _ = __webpack_require__(172);
+	var _ = __webpack_require__(171);
 	
 	var ShoppingBasket = function ShoppingBasket() {
 	  this.items = [], this.voucher = null;
@@ -37478,8 +37545,8 @@
 	  },
 	
 	  totalPrice: function totalPrice() {
-	    if (this.isVoucherValid()) {
-	      return this.totalOfItems() - this.getVoucherDiscount();
+	    if (this.voucher) {
+	      return this.totalOfItems() - this.getDiscount();
 	    }
 	    return this.totalOfItems();
 	  },
@@ -37495,6 +37562,7 @@
 	        var item = _step.value;
 	
 	        total += item.price;
+	        total -= item.discount;
 	      }
 	    } catch (err) {
 	      _didIteratorError = true;
@@ -37511,7 +37579,7 @@
 	      }
 	    }
 	
-	    return total;
+	    return parseFloat(total);
 	  },
 	
 	  hasItemOfCategory: function hasItemOfCategory(category) {
@@ -37523,41 +37591,19 @@
 	
 	  addDiscountVoucher: function addDiscountVoucher(voucher) {
 	    this.voucher = voucher;
-	    // if(this.voucher === null){
-	    //   this.voucher = voucher
-	    //   return
-	    // }
-	    // if(voucher.calculateDiscount(this.items) > this.voucher.calculateDiscount(this.items)){
-	    //   this.voucher = voucher
-	    // }
 	  },
 	
-	  clearVoucher: function clearVoucher() {
-	    this.voucher = null;
-	  },
-	
-	  getVoucherDiscount: function getVoucherDiscount() {
-	    if (this.voucher === null || this.items.length === 0) {
-	      return 0;
-	    }
-	    return this.voucher.calculateDiscount(this.items);
-	  },
-	
-	  isVoucherValid: function isVoucherValid() {
-	    return this.getVoucherDiscount() != 0;
-	  },
-	
-	  createFilters: function createFilters() {
-	    var filters = [];
+	  getDiscountOfItems: function getDiscountOfItems() {
+	    var total = 0;
 	    var _iteratorNormalCompletion2 = true;
 	    var _didIteratorError2 = false;
 	    var _iteratorError2 = undefined;
 	
 	    try {
 	      for (var _iterator2 = this.items[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	        item = _step2.value;
+	        var item = _step2.value;
 	
-	        filters.push({ id: item, selected: false });
+	        total += item.discount;
 	      }
 	    } catch (err) {
 	      _didIteratorError2 = true;
@@ -37574,27 +37620,88 @@
 	      }
 	    }
 	
-	    return filters;
+	    return total;
+	  },
+	
+	  getDiscount: function getDiscount(voucher) {
+	    var discount = this.getDiscountOfItems();
+	    if (this.voucher) {
+	      discount += this.voucher.calculateDiscount(this.items);
+	    }
+	    if (discount === 0) {
+	      return null;
+	    }
+	    return discount;
+	  },
+	
+	  clearVoucher: function clearVoucher() {
+	    this.voucher = null;
 	  }
+	
 	};
 	
 	module.exports = ShoppingBasket;
 
 /***/ },
-/* 175 */,
-/* 176 */
+/* 174 */
 /***/ function(module, exports) {
 
 	"use strict";
 	
-	var DiscountVoucher = function DiscountVoucher(code, calculateDiscount) {
+	var DiscountVoucher = function DiscountVoucher(code, calculateDiscount, discription) {
 	  this.code = code;
 	  this.calculateDiscount = calculateDiscount;
+	  this.discription = discription;
 	};
 	
 	DiscountVoucher.prototype = {};
 	
 	module.exports = DiscountVoucher;
+
+/***/ },
+/* 175 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(1);
+	
+	var VoucherItem = React.createClass({
+	  displayName: 'VoucherItem',
+	
+	
+	  handleClick: function handleClick() {
+	    this.props.removeItemFromBasket(this.props.voucher);
+	  },
+	
+	  render: function render() {
+	    return React.createElement(
+	      'div',
+	      { className: 'row', id: 'basket-item' },
+	      React.createElement(
+	        'div',
+	        { className: 'col-11', id: 'basket-item-nodes' },
+	        React.createElement(
+	          'p',
+	          { className: 'basket-node', id: 'voucher-discription' },
+	          this.props.voucher.discription
+	        )
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'col-1' },
+	        React.createElement(
+	          'button',
+	          { className: 'exitButton', onClick: this.handleClick },
+	          'X'
+	        )
+	      )
+	    );
+	  }
+	
+	});
+	
+	module.exports = VoucherItem;
 
 /***/ }
 /******/ ]);

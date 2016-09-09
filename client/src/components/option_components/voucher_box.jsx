@@ -15,8 +15,9 @@ var VoucherBox = React.createClass({
 
   handleClick: function(){
     console.log("button clicked")
+    this.chechIfVoucherIsValid(this.state.voucherCode)
+
     this.props.addVoucher(this.state.voucherCode)
-    this.chechIfVoucherIsValid()
   },
 
   showInvalidVoucherMessage: function(){
@@ -28,14 +29,16 @@ var VoucherBox = React.createClass({
     }.bind(this), 2000)
   },
 
-  chechIfVoucherIsValid: function(){
+  chechIfVoucherIsValid: function(code){
+    var productManager = this.props.productManager
     var shoppingBasket = this.props.shoppingBasket
-    if(shoppingBasket.voucher && shoppingBasket.isVoucherValid()){
+    if(productManager.isVoucherValid(code)){
       console.log("valid voucher")
+      shoppingBasket.addDiscountVoucher(productManager.getVoucher(code))
     }else{
-      shoppingBasket.clearVoucher()
       this.props.updateShoppingBasket(shoppingBasket)
-      console.log("invalid voucher removing")
+      this.props.updateProductManager(productManager)
+      console.log("invalid voucher")
       this.showInvalidVoucherMessage()
     }
   },
@@ -43,14 +46,12 @@ var VoucherBox = React.createClass({
   render: function(){
     return(
       <div>
+      
         <div className="row" id='voucher-box'>
-          <div className="col-6">
+          <div className="col-12">
             <input type="text" placeholder="voucher code" onChange={this.handleChange}/>
+            <button className="voucher-button" onClick={this.handleClick}>Apply</button>
           </div>
-          <div className="col-6">
-            <button onClick={this.handleClick}>Apply</button>
-          </div>
-
         </div>
 
         <div className="row">

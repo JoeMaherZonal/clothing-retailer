@@ -30,12 +30,127 @@
 
 /*end of grid setup*/
 
+body {
+  font-family: 'Libre Franklin', sans-serif;
+}
+
+#savings {
+  color:#409334;
+  font-size: 0.8em;
+}
+
+#voucher-discription {
+  color:#6bc060;
+  font-size:0.9em;
+}
+
+#product-box-discount{
+  text-decoration: line-through;
+  color:red;
+  font-weight: 700;
+  display: inline-block;
+  padding-right: 4%;
+}
+
+#product-box-price{
+  display: inline-block;
+}
+
+#product-box-name {
+  font-weight: 900;
+  font-size: 1em;
+  display: inline-block;
+}
+
+#product-box-colour {
+  padding-left: 4%;
+  font-size: 0.85em;
+  display: inline-block;
+}
+
+#product-box-cat {
+  padding-left: 3%;
+  font-size: 0.8em;
+  display: inline-block;
+}
+
+#product-box-price {
+  display: inline-block;
+}
+
+#product-box-quantity {
+  font-size: 0.85em;
+  display: inline-block;
+}
+
+#basket-list{
+  padding-left: 7%;
+  padding-right: 7%;
+}
+
+#basket-item {
+  padding:0.5em;
+  margin:1em;
+  background-color: #555555;
+}
+
+#basket-item-nodes {
+  flex-wrap: wrap;
+  display: inline-block;
+  text-align: center;
+}
+
+#basket-item-name {
+  color: white;
+  font-size: 1.3em;
+  font-weight: 500;
+  padding-right: 0.5em;
+}
+
+#basket-item-price {
+  color: white;
+  font-size: 1.3em;
+  font-weight: 500;
+}
+
+#basket-item-cat {
+  color: #a5a5a5;
+  font-size: 0.9em;
+  font-weight: 100;
+  padding-left: 0.5em;
+}
+
+#total-box {
+  font-weight: 500;
+  font-size: 1.3em;
+  text-align: right;
+  margin-right: 8.5%;
+}
+
+#basket-item-colour {
+  color: #a5a5a5;
+  font-size: 0.9em;
+  font-weight: 100;
+}
+
+.basket-node {
+  display: inline-block;
+}
+
+#filter-options-container {
+  text-align: center;
+}
+
 .invalid-voucher-message-hide {
   opacity: 0;
   transition: opacity 700ms ease-in-out;
   color:red;
   vertical-align: text-bottom;
   border: none;
+}
+
+.voucher-button{
+  margin-left: 1%;
 }
 
 .basket-button:hover {
@@ -49,10 +164,40 @@
   background-size: cover;
   height:3em;
   width: 5em;
-  padding-top: 1.8em;
+  padding-top: 1.5em;
   border: none;
   outline:none;
   color: white;
+}
+
+.filter-button {
+  position: relative;
+  top: 1.7em;
+  float: right;
+  border:none;
+  background: none;
+  font-weight: 800;
+}
+
+.filter-button:focus {
+  outline: none;
+  }
+
+.filter-button:hover {
+  color:gray;
+}
+
+.exitButton:hover{
+  font-weight: 500;
+}
+
+.exitButton {
+  float: right;
+  border:none;
+  background: none;
+  font-weight: 800;
+  outline:none;
+  color:white;
 }
 
 h1 {
@@ -96,7 +241,8 @@ h1 {
   margin-bottom: 1em;
   text-align: center;
   display: inline-block;
-  border: 1px solid black;
+  background-color:#e4e4e4 ;
+/*  border: 1px solid black;*/
 }
 
 p {

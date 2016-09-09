@@ -1,5 +1,4 @@
 var React = require('react')
-var TitleBox = require('./title_box')
 var OptionsBox = require('./option_components/options_box')
 var ProductList = require('./product_display_components/product_list')
 var ProductManager = require('../models/product_manager')
@@ -11,16 +10,8 @@ var AppBox = React.createClass({
 
   getInitialState: function(){
     return {
-      selectedFilters: [
-      {id: "men", selected: false},
-      {id: "women", selected: false},
-      {id: "casual", selected: false},
-      {id: "formal", selected: false},
-      {id: "footwear", selected: false}
-      ],
       productManager: null,
       shoppingBasket: new ShoppingBasket(),
-      validVouchers: null
     }
   },
 
@@ -32,6 +23,7 @@ var AppBox = React.createClass({
       if(request.status === 200){
         var data = JSON.parse(request.responseText)
         this.createProductManager(data)
+        this.createValidVouchers()
       }
     }.bind(this)
     request.send(null)
@@ -46,23 +38,29 @@ var AppBox = React.createClass({
     this.setState({shoppingBasket: shoppingBasket})
   },
 
-  loadPreviousShoppingData: function(){
-    var previousShopping = JSON.parse(localStorage.getItem('shoppingBasket')) || []
-    var previousVoucher = JSON.parse(localStorage.getItem('voucher')) || null
-    var currentShoppingBasket = this.state.shoppingBasket
-    currentShoppingBasket.items = previousShopping
-    currentShoppingBasket.voucher = previousVoucher
-    this.setState({shoppingBasket: currentShoppingBasket })
-  },
+  //TODO
+  // loadPreviousShoppingData: function(){
+  //   var previousShopping = JSON.parse(localStorage.getItem('shoppingBasket')) || []
+  //   var previousVoucher = JSON.parse(localStorage.getItem('voucher')) || null
+  //   var currentShoppingBasket = this.state.shoppingBasket
+  //   currentShoppingBasket.items = previousShopping
+  //   currentShoppingBasket.voucher = previousVoucher
+  //   this.setState({shoppingBasket: currentShoppingBasket })
+  // },
 
-  saveCurrentShopping: function(){
-    var currentShopping = this.state.shoppingBasket.items
-    var currentVoucher = this.state.shoppingBasket.voucher
-    localStorage.setItem('shoppingBasket', JSON.stringify(allResults));
-  },
+  // saveCurrentShopping: function(){
+  //   var currentShopping = this.state.shoppingBasket.items
+  //   var currentVoucher = this.state.shoppingBasket.voucher
+  //   localStorage.setItem('shoppingBasket', JSON.stringify(allResults));
+  // },
 
   removeItemFromBasket: function(product){
     var shoppingBasket = this.state.shoppingBasket
+    var productManager = this.state.productManager
+    if(product.code){
+      shoppingBasket.clearVoucher()
+    }
+    productManager.returnProduct(product)
     shoppingBasket.removeItem(product)
     this.setState({shoppingBasket: shoppingBasket})
   },
@@ -75,21 +73,15 @@ var AppBox = React.createClass({
   readyState: function() {
     this.createShoppingBasket()
     this.loadPreviousShoppingData()
-    this.createValidVouchers()
   },
 
   componentDidMount(){
     this.readyState()
     this.loadDataFromAPI()
-    // setInterval(this.loadDataFromAPI, 500)
   },
 
   findVoucher: function(code){
-    for(var voucher of this.state.validVouchers){
-      if(voucher.code === code){
-        return voucher
-      }
-    }
+    this.state.productManager.getVoucher(code)
   },
 
   addVoucher: function(code){
@@ -103,60 +95,33 @@ var AppBox = React.createClass({
   createProductManager: function(data){
     var productManager = new ProductManager()
     for(var product of data){
-      productManager.addProduct({name: product.name, price: product.price, category: product.category, colour: product.colour, quantity: product.quantity})
+      productManager.addProduct({name: product.name, price: product.price, category: product.category, colour: product.colour, quantity: product.quantity, discount: product.discount})
     }
     this.setState({productManager: productManager})
   },
 
-  updateFilter: function(target){
-    var filter = this.state.selectedFilters.map(function(filter) {
-      var selected = filter.selected
-      if(target.id === filter.id){
-        if(selected){
-          selected = false
-        }else{
-          selected = true
-        }
-      }
-      return {
-        id: filter.id,
-        selected: selected
-        };
-    })
-    this.setState({selectedFilters: filter})
-  },
-
   productsToDisplay: function(){
     var productManager = this.state.productManager || new ProductManager()
-    if(!this.checkForNoFilteres()){
       return productManager.products
-    }
-    var filteredProducts = []
-    for(var filter of this.state.selectedFilters){
-      if(filter.selected){
-         filteredProducts = filteredProducts.concat(productManager.productsOfCat(filter.id))
-      }
-    }
-    return _.uniqBy(filteredProducts, function(element){
-      return element.name
-    })
-  },
-
-  checkForNoFilteres: function(){
-    for(var filter of this.state.selectedFilters){
-      if(filter.selected){return true}
-    }
-    return false
   },
 
   updateShoppingBasket: function(shoppingBasket){
     this.setState({shoppingBasket: shoppingBasket})
   },
 
+  updateProductManager: function(productManager){
+    this.setState({productManager: productManager})
+  },
+
+  //TODO - isolate and tidyup
   createValidVouchers: function(){
-    var discountVoucher1 = new DiscountVoucher("5OFF", function(){
-      return 5
-    })
+    var discountVoucher1 = new DiscountVoucher("5OFF", function(items){
+      var totalSpend = _.sumBy(items, function(product) { return product.price; })
+      if(totalSpend > 5){
+        return 5
+      }
+      return 0
+    }, "£5 off any order")
     var discountVoucher2 = new DiscountVoucher("10OFF", function(items){
       var totalSpend = _.sumBy(items, function(o) { return o.price; })
       if(totalSpend > 50){
@@ -164,16 +129,15 @@ var AppBox = React.createClass({
       }else{
         return 0;
       }
-    })
+    }, "£10 off when you spend £50")
     var discountVoucher3 = new DiscountVoucher("15OFF", function(items){
       var totalSpend = _.sumBy(items, function(product) { return product.price; })
       var hasItemWithCategory = false
       for(var item of items){
-        for(var cat of item.categorys){
-          if(cat === "footwear"){
+          var catArray = item.categorys.split(/(\s)/)
+          if(catArray[2] === "Footwear"){
             hasItemWithCategory = true
           }
-        }
       }
       if(totalSpend > 75 && hasItemWithCategory){
         return 15;
@@ -181,8 +145,10 @@ var AppBox = React.createClass({
         //invalid
         return 0;
       }
-    })
-    this.setState({validVouchers: [discountVoucher1, discountVoucher2, discountVoucher3]})
+    }, "£15 off when you buy footwear and spend £75")
+    var productManager = this.state.productManager
+    productManager.setVouchers([discountVoucher1, discountVoucher2, discountVoucher3])
+    this.setState({productManager: productManager})
   },
 
   render: function(){
@@ -191,15 +157,9 @@ var AppBox = React.createClass({
       <div className="row" id='app-container'>
       <div className="col-12">
 
-        <div className="row" id="titlecontainer">
-          <div className="col-12" id="titlecontainer">
-            <TitleBox />
-          </div>
-        </div>
-
         <div className="row">
           <div className="col-12">
-            <OptionsBox updateFilter={this.updateFilter} shoppingBasket = {this.state.shoppingBasket} removeItemFromBasket={this.removeItemFromBasket} addVoucher={this.addVoucher} updateShoppingBasket={this.updateShoppingBasket}/>
+            <OptionsBox updateFilter={this.updateFilter} shoppingBasket = {this.state.shoppingBasket} removeItemFromBasket={this.removeItemFromBasket} addVoucher={this.addVoucher} updateShoppingBasket={this.updateShoppingBasket} productManager={this.state.productManager} updateProductManager={this.updateProductManager}/>
           </div>
         </div>
 

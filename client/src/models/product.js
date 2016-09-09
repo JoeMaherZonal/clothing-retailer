@@ -4,8 +4,9 @@ var Product = function(params){
   this.name = params.name,
   this.categorys = params.category,
   this.colour = params.colour,
-  this.price = parseInt(params.price)
-  this.quantity = parseInt(params.quantity)
+  this.price = parseFloat(params.price)
+  this.quantity = params.quantity
+  this.discount = parseFloat(params.discount)
 }
 
 Product.prototype = {
@@ -17,6 +18,11 @@ Product.prototype = {
       }
     }
     return false
+  },
+
+  getPrice: function(){
+    var price = this.price - this.discount
+    return price.toFixed(2)
   }
 
 }

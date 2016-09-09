@@ -3,12 +3,12 @@ var _ = require('lodash')
 
 var ProductManager = function(){
   this.products = []
+  this.validVouchers = []
 }
 
 ProductManager.prototype = {
 
   addProduct: function(params){
-    //prevents invalid objects becoming stock
     if(!params.name || !params.price || !params.category || !params.colour){
       return
     }
@@ -21,6 +21,13 @@ ProductManager.prototype = {
     var index = this.products.indexOf(product)
     this.products[index].quantity -= 1
 
+  },
+
+  returnProduct: function(product){
+    if(product.quantity){
+    var index = this.products.indexOf(product)
+    this.products[index].quantity += 1
+    }
   },
 
   removeProduct: function(product){
@@ -38,7 +45,35 @@ ProductManager.prototype = {
   findProduct: function(product){
     var index = this.products.indexOf(product)
     return this.products[index]
-  }
+  },
+
+  setVouchers: function(vouchers){
+    this.validVouchers = vouchers
+  },  
+
+  getVoucher: function(code){
+    if(this.isVoucherValid(code)){
+      for(var voucher of this.validVouchers){
+        if(code === voucher.code){
+          return voucher
+        }
+      }
+    }
+  },
+
+  getVoucherDiscount: function(voucher){
+    if(!voucher){return}
+    return voucher.calculateDiscount(this.items)
+  },
+
+  isVoucherValid: function(code){
+    for(var voucher of this.validVouchers){
+      if(code === voucher.code){
+        return true
+      }
+    }
+    return false
+  },
 
 }
 

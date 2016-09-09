@@ -12,7 +12,7 @@ var BasketBox = React.createClass({
 
         <div className="row">
           <div className="col-12">
-          <BasketList removeItemFromBasket={this.props.removeItemFromBasket}shoppingItems = {this.props.shoppingBasket.items} />
+          <BasketList removeItemFromBasket={this.props.removeItemFromBasket}shoppingBasket = {this.props.shoppingBasket} />
           </div>
         </div>
 
@@ -24,7 +24,7 @@ var BasketBox = React.createClass({
 
         <div className="row">
           <div className="col-12">
-          <VoucherBox shoppingBasket={this.props.shoppingBasket} addVoucher={this.props.addVoucher} updateShoppingBasket={this.props.updateShoppingBasket} />
+          <VoucherBox shoppingBasket={this.props.shoppingBasket} addVoucher={this.props.addVoucher} updateShoppingBasket={this.props.updateShoppingBasket} productManager={this.props.productManager} updateProductManager={this.props.updateProductManager} />
           </div>
         </div>
 
