@@ -7,15 +7,14 @@ var ProductManager = require('../models/product_manager.js')
 describe("Shopping Basket Tests", function(){
 
   beforeEach(function(){
-    productParams1 = {name: "Bag", colour: "Blue", category: "Accessory", price: 20}
+    productParams1 = {name: "Bag", colour: "Blue", category: "Accessory", price: 20, quantity: 1, discount: 0}
     productManager = new ProductManager()
     shoppingBasket = new ShoppingBasket()
     productManager.addProduct(productParams1)
-    product = productManager.productByName("Bag")
+    product = productManager.products[0]
   })
 
   it('can add item to basket', function(){
-
     shoppingBasket.addItem(product)
     assert.equal(1, shoppingBasket.items.length)
   })
@@ -27,7 +26,7 @@ describe("Shopping Basket Tests", function(){
     assert.equal(0, shoppingBasket.items.length)
   })
 
-  it('can calculate price of one item in basket', function(){
+  it('can calculate price of all items in basket', function(){
     shoppingBasket.addItem(product)
     assert.equal(20, shoppingBasket.totalPrice())
   })

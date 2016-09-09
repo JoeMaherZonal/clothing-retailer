@@ -17,7 +17,7 @@ describe("Product Tests", function(){
   })
 
   it('Product has correct category', function(){
-    assert.equal("Accessory", product1.category)
+    assert.equal("Accessory", product1.categorys)
   })
 
   it('Product has correct price', function(){
