@@ -2,11 +2,11 @@
 
 ![Screen shot](screenshot.png)
 
-###The project breif
+###The project brief
 
 The retailer sells six different categories of clothes: women’s footwear, men’s
 footwear, women’s casualwear, men’s casualwear, women’s formalwear and
-man’s formalwear.
+men’s formalwear.
 The page that you develop should display all of the available products, as well
 as a shopping cart to which they can be added.
 
@@ -29,7 +29,7 @@ cart.
 with discounts applied.
 - [x] As a User I am alerted when I apply an invalid voucher to my shopping
 cart.
-- [x] As a User I am unable to Out of Stock products to the shopping cart.
+- [x] As a User I am unable to add Out of Stock products to the shopping cart.
 
 ### Installation
 
@@ -63,7 +63,7 @@ $ npm test
 
 ### How I developed the solution
 
-I initially started by planning the models I wanted to impliment, writing the tests for them and getting them to pass by building the models. Once I did this I began building the react comopnents and a skeleton layout.
+I initially started by planning the models I wanted to implement, writing the tests for them and getting them to pass by building the models. Once I did this I began building the react components and a skeleton layout.
 
 I decided to use react to build my frontend as it is a technology I'm currently learning to use and this project really helped my understanding of it. Being new to the technology I found myself trying different approaches to the solution which meant my models changed during the course of development and my tests needed updating.
 
@@ -78,5 +78,5 @@ I enjoyed creating this website and gaining a deeper understanding of the techno
 - improve css by adding transitions and colour
 - refactored css
 - Refactor tests
-- Look into possibily using other frameworks
+- Look into possibly using other frameworks
 
