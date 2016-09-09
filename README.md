@@ -39,6 +39,9 @@ You need [node.js](http://nodejs.org) installed globally:
 $ git clone git@github.com:maherz2/clothing-retailer.git
 $ cd clothing-retailer
 $ npm install
+$ cd client
+$ npm install
+$ cd ..
 $ npm start
 ```
 visit [http://localhost:5000](http://localhost:5000)
