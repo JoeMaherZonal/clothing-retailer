@@ -14,7 +14,8 @@ ShoppingBasket.prototype = {
   },
 
   removeItem: function(product){
-    if(this.items.length === 0){return}
+    //checks if there are items and that product is not a voucher
+    if(this.items.length === 0 || product.code){return}
     var index = this.items.indexOf(product)
     this.items.splice(index, 1)
   },

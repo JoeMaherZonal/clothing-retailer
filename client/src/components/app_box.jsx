@@ -72,7 +72,7 @@ var AppBox = React.createClass({
 
   readyState: function() {
     this.createShoppingBasket()
-    this.loadPreviousShoppingData()
+    // this.loadPreviousShoppingData()
   },
 
   componentDidMount(){
